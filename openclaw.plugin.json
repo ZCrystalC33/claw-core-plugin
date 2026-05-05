@@ -1,0 +1,14 @@
+{
+  "id": "claw-core",
+  "name": "Claw_Core",
+  "description": "Claw_Core System: decompose, route-task, benchmark, insights",
+  "version": "1.5.1",
+  "main": "register.js",
+  "openclaw": {
+    "minVersion": "2026.4.0",
+    "skills": {
+      "dir": "skills",
+      "autoScan": true
+    }
+  }
+}

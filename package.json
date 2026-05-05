@@ -1,0 +1,17 @@
+{
+  "name": "claw-core-plugin",
+  "version": "1.5.1",
+  "description": "Claw_Core System integration for OpenClaw",
+  "main": "dist/register.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@sinclair/typebox": "^0.34.49",
+    "@types/node": "^22.0.0",
+    "openclaw": "^2026.4.15",
+    "typescript": "^5.6.0"
+  },
+  "dependencies": {}
+}
