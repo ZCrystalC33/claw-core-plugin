@@ -7,6 +7,15 @@
   "scripts": {
     "build": "tsc"
   },
+  "openclaw": {
+    "extensions": [
+      "./dist/register.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.4.12",
+      "minGatewayVersion": "2026.4.15"
+    }
+  },
   "devDependencies": {
     "@sinclair/typebox": "^0.34.49",
     "@types/node": "^22.0.0",
