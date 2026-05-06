@@ -53,7 +53,7 @@ function clearRecallContext() {
 // ZCrystal Evo Imports (via @zcrystal/evo symlink)
 // =====================================================================
 import { UnifiedApiRouter, createHonchoClient, createSkillManager, SelfEvolutionEngine, EvolutionCoordinator, EvolutionScheduler, ReviewEngine, ToolHub, SkillGenerator, SkillVersioning, SkillIndexer, SkillValidator, SkillMerger, CircuitBreaker, RateLimiter, StructuredLogger, Metrics, WorkflowEngine, OpenClawSkillAdapter, SkillSyncManager, ReplayRunner, HookRegistry, DiskStore, EvolutionStore, TraceStore, } from '@zcrystal/evo';
-import { registerCoreTools, registerTaskTools, registerSkillTools, registerWorkflowTools, registerSystemTools, registerProactiveTools, registerHealthTools, registerMetricsTools, registerPipelineTools, registerDecomposeRouterTools, registerCredentialPoolTools, registerSkillSystemTools, registerBenchmarkTools, registerEventsTools, registerMiddlewareTools, registerRegistryTools, registerRetryTools, registerTelemetryTools, registerCircuitBreakerTools, registerRateLimitTools, registerCoordinatorTools, registerWorkerpoolTools, registerMonitorTools, } from './src/tools/index.js';
+import { registerBulkheadTools, registerCacheTools, registerContextEngineTools, registerCoreTools, registerCredentialPoolTools, registerBenchmarkTools, registerDecomposeRouterTools, registerDecomposerTools, registerErrorClassifierTools, registerEventsTools, registerFeaturesTools, registerHealthTools, registerLazyTools, registerLockTools, registerMetricsTools, registerMiddlewareTools, registerMonitorTools, registerPipelineTools, registerProactiveTools, registerQuotaTools, registerRateLimitTools, registerRegistryTools, registerRetryTools, registerSerializersTools, registerCircuitBreakerTools, registerSkillSystemTools, registerSkillTools, registerSystemTools, registerTaskTools, registerTelemetryTools, registerWorkerpoolTools, registerWorkflowTools, } from './src/tools/index.js';
 import { registerSignalTools } from './src/routes/signals.js';
 let zcState = null;
 function okResult(text, details) {
@@ -457,6 +457,16 @@ export default definePluginEntry({
             registerCoordinatorTools(api);
             registerWorkerpoolTools(api);
             registerMonitorTools(api);
+            registerBulkheadTools(api);
+            registerCacheTools(api);
+            registerContextEngineTools(api);
+            registerDecomposerTools(api);
+            registerErrorClassifierTools(api);
+            registerFeaturesTools(api);
+            registerLazyTools(api);
+            registerLockTools(api);
+            registerQuotaTools(api);
+            registerSerializersTools(api);
             registerSignalTools(api, zcState);
         }
         // =====================================================================

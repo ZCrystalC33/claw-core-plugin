@@ -105,29 +105,39 @@ import {
 } from '@zcrystal/evo';
 
 import {
+  registerBulkheadTools,
+  registerCacheTools,
+  registerContextEngineTools,
   registerCoreTools,
-  registerTaskTools,
-  registerSkillTools,
-  registerWorkflowTools,
-  registerSystemTools,
-  registerProactiveTools,
-  registerHealthTools,
-  registerMetricsTools,
-  registerPipelineTools,
-  registerDecomposeRouterTools,
   registerCredentialPoolTools,
-  registerSkillSystemTools,
   registerBenchmarkTools,
+  registerDecomposeRouterTools,
+  registerDecomposerTools,
+  registerErrorClassifierTools,
   registerEventsTools,
+  registerFeaturesTools,
+  registerHealthTools,
+  registerLazyTools,
+  registerLockTools,
+  registerMetricsTools,
   registerMiddlewareTools,
+  registerMonitorTools,
+  registerPipelineTools,
+  registerProactiveTools,
+  registerQuotaTools,
+  registerRateLimitTools,
   registerRegistryTools,
   registerRetryTools,
-  registerTelemetryTools,
+  registerSerializersTools,
   registerCircuitBreakerTools,
-  registerRateLimitTools,
   registerCoordinatorTools,
+  registerSkillSystemTools,
+  registerSkillTools,
+  registerSystemTools,
+  registerTaskTools,
+  registerTelemetryTools,
   registerWorkerpoolTools,
-  registerMonitorTools,
+  registerWorkflowTools,
 } from './src/tools/index.js';
 import { registerSignalTools } from './src/routes/signals.js';
 
@@ -615,6 +625,16 @@ export default definePluginEntry({
       registerCoordinatorTools(api);
       registerWorkerpoolTools(api);
       registerMonitorTools(api);
+      registerBulkheadTools(api);
+      registerCacheTools(api);
+      registerContextEngineTools(api);
+      registerDecomposerTools(api);
+      registerErrorClassifierTools(api);
+      registerFeaturesTools(api);
+      registerLazyTools(api);
+      registerLockTools(api);
+      registerQuotaTools(api);
+      registerSerializersTools(api);
       registerSignalTools(api, zcState as any);
     }
 

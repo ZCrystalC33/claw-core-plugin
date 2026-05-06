@@ -1,0 +1,1 @@
+export { registerCacheTools } from '../../dist/src/tools/cache-tools.js';

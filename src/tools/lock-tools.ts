@@ -1,0 +1,1 @@
+export { registerLockTools } from '../../dist/src/tools/lock-tools.js';
