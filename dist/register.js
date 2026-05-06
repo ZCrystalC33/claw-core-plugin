@@ -53,7 +53,7 @@ function clearRecallContext() {
 // ZCrystal Evo Imports (via @zcrystal/evo symlink)
 // =====================================================================
 import { UnifiedApiRouter, createHonchoClient, createSkillManager, SelfEvolutionEngine, EvolutionCoordinator, EvolutionScheduler, ReviewEngine, ToolHub, SkillGenerator, SkillVersioning, SkillIndexer, SkillValidator, SkillMerger, CircuitBreaker, RateLimiter, StructuredLogger, Metrics, WorkflowEngine, OpenClawSkillAdapter, SkillSyncManager, ReplayRunner, HookRegistry, DiskStore, EvolutionStore, TraceStore, } from '@zcrystal/evo';
-import { registerCoreTools, registerTaskTools, registerSkillTools, registerWorkflowTools, registerSystemTools, registerProactiveTools, registerHealthTools, registerMetricsTools, registerPipelineTools, registerDecomposeRouterTools, } from './src/tools/index.js';
+import { registerCoreTools, registerTaskTools, registerSkillTools, registerWorkflowTools, registerSystemTools, registerProactiveTools, registerHealthTools, registerMetricsTools, registerPipelineTools, registerDecomposeRouterTools, registerCredentialPoolTools, registerSkillSystemTools, registerBenchmarkTools, registerEventsTools, registerMiddlewareTools, registerRegistryTools, registerRetryTools, registerTelemetryTools, registerCircuitBreakerTools, } from './src/tools/index.js';
 import { registerSignalTools } from './src/routes/signals.js';
 let zcState = null;
 function okResult(text, details) {
@@ -444,6 +444,15 @@ export default definePluginEntry({
             registerMetricsTools(api);
             registerPipelineTools(api);
             registerDecomposeRouterTools(api);
+            registerCredentialPoolTools(api);
+            registerSkillSystemTools(api);
+            registerBenchmarkTools(api);
+            registerEventsTools(api);
+            registerMiddlewareTools(api);
+            registerRegistryTools(api);
+            registerRetryTools(api);
+            registerTelemetryTools(api);
+            registerCircuitBreakerTools(api);
             registerSignalTools(api, zcState);
         }
         // =====================================================================

@@ -115,6 +115,19 @@ import {
   registerMetricsTools,
   registerPipelineTools,
   registerDecomposeRouterTools,
+  registerCredentialPoolTools,
+  registerSkillSystemTools,
+  registerBenchmarkTools,
+  registerEventsTools,
+  registerMiddlewareTools,
+  registerRegistryTools,
+  registerRetryTools,
+  registerTelemetryTools,
+  registerCircuitBreakerTools,
+  registerRateLimitTools,
+  registerCoordinatorTools,
+  registerWorkerpoolTools,
+  registerMonitorTools,
 } from './src/tools/index.js';
 import { registerSignalTools } from './src/routes/signals.js';
 
@@ -589,6 +602,19 @@ export default definePluginEntry({
       registerMetricsTools(api);
       registerPipelineTools(api);
       registerDecomposeRouterTools(api);
+      registerCredentialPoolTools(api);
+      registerSkillSystemTools(api);
+      registerBenchmarkTools(api);
+      registerEventsTools(api);
+      registerMiddlewareTools(api);
+      registerRegistryTools(api);
+      registerRetryTools(api);
+      registerTelemetryTools(api);
+      registerCircuitBreakerTools(api);
+      registerRateLimitTools(api);
+      registerCoordinatorTools(api);
+      registerWorkerpoolTools(api);
+      registerMonitorTools(api);
       registerSignalTools(api, zcState as any);
     }
 
