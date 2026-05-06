@@ -31,7 +31,7 @@ export function registerMiddlewareTools(api) {
             func: Type.String({ description: 'Function body (lambda or def)' }),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const script = `
 import sys
 import json

@@ -33,7 +33,7 @@ export function registerRegistryTools(api) {
             status: Type.Optional(Type.String({ description: 'Initial status (default: available)' })),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const caps = JSON.stringify(params.capabilities || []).replace(/"/g, "'");
             const script = `
 import sys
@@ -60,7 +60,7 @@ print(json.dumps({'success': True, 'member': member}))
             member_id: Type.String({ description: 'Member ID to remove' }),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const script = `
 import sys
 import json
@@ -155,7 +155,7 @@ print(json.dumps(stats))
             required_capability: Type.String({ description: 'Required capability' }),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const script = `
 import sys
 import json

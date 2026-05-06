@@ -31,7 +31,7 @@ export function registerEventsTools(api) {
             data: Type.Optional(Type.String({ description: 'Event payload as JSON string' })),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const script = `
 import sys
 import json
@@ -60,7 +60,7 @@ print(json.dumps({'success': True, 'published': result}))
             handler_id: Type.String({ description: 'Unique handler identifier' }),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const script = `
 import sys
 import json
@@ -86,7 +86,7 @@ print(json.dumps({'success': True, 'subscribed': '${params.event_type}', 'handle
             limit: Type.Optional(Type.Number({ description: 'Max events to return (default 20)' })),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const limit = params.limit || 20;
             const script = `
 import sys

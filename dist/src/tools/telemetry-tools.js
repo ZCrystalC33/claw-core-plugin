@@ -32,7 +32,7 @@ export function registerTelemetryTools(api) {
             metadata: Type.Optional(Type.String({ description: 'JSON metadata string' })),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const metadata = params.metadata ? `'${params.metadata.replace(/'/g, "\\'")}'` : '{}';
             const script = `
 import sys
@@ -89,7 +89,7 @@ except Exception as e:
             limit: Type.Optional(Type.Number({ description: 'Max traces to export (default: 50)' })),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const limit = params.limit || 50;
             const script = `
 import sys

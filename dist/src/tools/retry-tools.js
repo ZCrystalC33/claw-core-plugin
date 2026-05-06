@@ -31,7 +31,7 @@ export function registerRetryTools(api) {
             max_attempts: Type.Optional(Type.Number({ description: 'Max retry attempts (default: 3)' })),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const maxAttempts = params.max_attempts || 3;
             const script = `
 import sys
@@ -102,7 +102,7 @@ except:
             fail_count: Type.Optional(Type.Number({ description: 'Number of failures before success (default: 2)' })),
         }),
         async execute(_id, _params) {
-            const params = _params as any;
+            const params = _params;
             const failCount = params.fail_count || 2;
             const script = `
 import sys
