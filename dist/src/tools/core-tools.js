@@ -47,7 +47,10 @@ export function registerCoreTools(api, state) {
         label: 'ZCrystal Search',
         description: 'Search conversation history (FTS5)',
         parameters: Type.Object({ query: Type.String(), limit: Type.Optional(Type.Number()) }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const limit = params.limit || 10;
             // FIX: Direct FTS5 search via Python subprocess (bypasses MCP HTTP dependency)
             try {
@@ -85,7 +88,10 @@ export function registerCoreTools(api, state) {
         label: 'ZCrystal Ask User',
         description: 'Ask Honcho about user preferences',
         parameters: Type.Object({ question: Type.String(), depth: Type.Optional(Type.String()) }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const result = await state.honcho.ask('user', params.question, params.depth || 'quick');
             if (result.ok && result.data)
                 return okResult(result.data, { question: params.question });
@@ -114,7 +120,10 @@ export function registerCoreTools(api, state) {
         label: 'ZCrystal Skill Read',
         description: 'Read content of a skill',
         parameters: Type.Object({ slug: Type.String() }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             // FIX: Use helper type guards instead of inline casting
             const skillResult = await state.skillManager.getSkill(params.slug);
             const skill = unwrapSkill(skillResult);
@@ -146,7 +155,10 @@ export function registerCoreTools(api, state) {
         label: 'ZCrystal Evolve',
         description: 'Trigger self-evolution for a skill or all skills',
         parameters: Type.Object({ slug: Type.Optional(Type.String()), iterations: Type.Optional(Type.Number()) }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const result = await state.router.startEvolution(params.slug);
             if (result.success)
                 return okResult('Evolution started', result.data);
@@ -162,7 +174,10 @@ export function registerCoreTools(api, state) {
             skillSlug: Type.String(), input: Type.String(), output: Type.String(),
             success: Type.Boolean(), duration: Type.Number(),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             try {
                 if (!state?.traceStore) {
                     state?.logger?.warning('[ZCrystal] traceStore not available');
@@ -200,7 +215,10 @@ export function registerCoreTools(api, state) {
             query: Type.String(),
             limit: Type.Optional(Type.Number()),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const limit = params.limit || 20;
             try {
                 const { getMemoryIndex, formatMemoryIndexTable } = await import('../memory/progressive.js');
@@ -221,7 +239,10 @@ export function registerCoreTools(api, state) {
         parameters: Type.Object({
             id: Type.Number(),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             try {
                 const { getMemoryEntryById } = await import('../memory/progressive.js');
                 const content = await getMemoryEntryById(params.id);
@@ -245,7 +266,10 @@ export function registerCoreTools(api, state) {
             query: Type.String(),
             limit: Type.Optional(Type.Number()),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const limit = params.limit || 5;
             try {
                 // First check if there's pending recall from auto-detection

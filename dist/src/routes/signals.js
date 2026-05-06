@@ -45,7 +45,8 @@ export function registerSignalTools(api, _state) {
             symbol: Type.Optional(Type.String()),
             limit: Type.Optional(Type.Number()),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
             const store = getSignalStore();
             let signals;
             if (params.symbol) {
@@ -64,7 +65,8 @@ export function registerSignalTools(api, _state) {
         label: 'ZCrystal Signals Get',
         description: 'Get a specific trading signal by ID',
         parameters: Type.Object({ id: Type.String() }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
             const store = getSignalStore();
             const signal = store.get(params.id);
             if (!signal)
@@ -88,7 +90,8 @@ export function registerSignalTools(api, _state) {
             metadata: Type.Optional(Type.Record(Type.String(), Type.Any())),
             push_webhook: Type.Optional(Type.Boolean()),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
             const store = getSignalStore();
             const input = {
                 symbol: params.symbol,
@@ -121,7 +124,8 @@ export function registerSignalTools(api, _state) {
         label: 'ZCrystal Signals Delete',
         description: 'Delete a trading signal by ID',
         parameters: Type.Object({ id: Type.String() }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
             const store = getSignalStore();
             const result = await store.remove(params.id);
             if (!result.ok)
@@ -137,7 +141,8 @@ export function registerSignalTools(api, _state) {
         parameters: Type.Object({
             signal_id: Type.String(),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
             const store = getSignalStore();
             const signal = store.get(params.signal_id);
             if (!signal)
@@ -159,7 +164,8 @@ export function registerSignalTools(api, _state) {
             url: Type.String(),
             secret: Type.Optional(Type.String()),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
             const webhook = getSignalWebhook();
             webhook.setUrl(params.url);
             return okResult(`Webhook URL configured: ${params.url}`);

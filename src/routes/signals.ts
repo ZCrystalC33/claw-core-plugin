@@ -56,7 +56,7 @@ export function registerSignalTools(api: OpenClawPluginApi, _state: PluginState)
       symbol: Type.Optional(Type.String()),
       limit: Type.Optional(Type.Number()),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       const store = getSignalStore();
       let signals: Signal[];
       if (params.symbol) {
@@ -75,7 +75,7 @@ export function registerSignalTools(api: OpenClawPluginApi, _state: PluginState)
     label: 'ZCrystal Signals Get',
     description: 'Get a specific trading signal by ID',
     parameters: Type.Object({ id: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       const store = getSignalStore();
       const signal = store.get(params.id);
       if (!signal) return errResult(`Signal not found: ${params.id}`);
@@ -99,7 +99,7 @@ export function registerSignalTools(api: OpenClawPluginApi, _state: PluginState)
       metadata: Type.Optional(Type.Record(Type.String(), Type.Any())),
       push_webhook: Type.Optional(Type.Boolean()),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       const store = getSignalStore();
       const input: SignalCreateInput = {
         symbol: params.symbol,
@@ -135,7 +135,7 @@ export function registerSignalTools(api: OpenClawPluginApi, _state: PluginState)
     label: 'ZCrystal Signals Delete',
     description: 'Delete a trading signal by ID',
     parameters: Type.Object({ id: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       const store = getSignalStore();
       const result = await store.remove(params.id);
       if (!result.ok) return errResult(`Signal not found: ${params.id}`);
@@ -151,7 +151,7 @@ export function registerSignalTools(api: OpenClawPluginApi, _state: PluginState)
     parameters: Type.Object({
       signal_id: Type.String(),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       const store = getSignalStore();
       const signal = store.get(params.signal_id);
       if (!signal) return errResult(`Signal not found: ${params.signal_id}`);
@@ -174,7 +174,7 @@ export function registerSignalTools(api: OpenClawPluginApi, _state: PluginState)
       url: Type.String(),
       secret: Type.Optional(Type.String()),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       const webhook = getSignalWebhook();
       webhook.setUrl(params.url);
       return okResult(`Webhook URL configured: ${params.url}`);

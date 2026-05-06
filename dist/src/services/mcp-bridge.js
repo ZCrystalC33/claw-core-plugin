@@ -213,7 +213,8 @@ ${toolNames.length > 0 ? '- Tools: ' + toolNames.join(', ') : ''}`, {
             toolName: Type.String(),
             arguments: Type.Optional(Type.Record(Type.String(), Type.Any())),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
             if (!state.initialized)
                 return errResult('MCP bridge not initialized');
             if (!state.connected || !state.mcpClient) {

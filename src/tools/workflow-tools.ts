@@ -32,7 +32,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
       userId: Type.String(), repr: Type.String(),
       input: Type.Optional(Type.Record(Type.String(), Type.Any())),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const task = state.workflowEngine.createTask(params.userId, params.taskType, params.trigger as TriggerType, params.repr, params.input || {});
       return okResult('Workflow created: ' + task.id, { taskId: task.id });
     },
@@ -43,7 +45,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
     label: 'ZCrystal Workflow Get',
     description: 'Get workflow task by ID',
     parameters: Type.Object({ taskId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const task = state.workflowEngine.getTask(params.taskId);
       if (task) return okResult(JSON.stringify(task, null, 2));
       return errResult('Task not found');
@@ -66,7 +70,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
     label: 'ZCrystal Workflow Pause',
     description: 'Pause a running workflow',
     parameters: Type.Object({ taskId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const success = state.workflowEngine.pauseTask(params.taskId);
       if (success) return okResult('Workflow paused: ' + params.taskId);
       return errResult('Failed to pause workflow');
@@ -78,7 +84,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
     label: 'ZCrystal Workflow Resume',
     description: 'Resume a paused workflow',
     parameters: Type.Object({ taskId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const success = state.workflowEngine.resumeTask(params.taskId);
       if (success) return okResult('Workflow resumed: ' + params.taskId);
       return errResult('Failed to resume workflow');
@@ -90,7 +98,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
     label: 'ZCrystal Workflow Cancel',
     description: 'Cancel a workflow',
     parameters: Type.Object({ taskId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const success = state.workflowEngine.cancelTask(params.taskId);
       if (success) return okResult('Workflow cancelled: ' + params.taskId);
       return errResult('Failed to cancel workflow');
@@ -127,7 +137,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
     label: 'ZCrystal Adapter Import',
     description: 'Import an OpenClaw skill to ZCrystal',
     parameters: Type.Object({ skillSlug: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const result = await state.skillAdapter.importSkill(params.skillSlug);
       if (result.ok) return okResult('Imported: ' + params.skillSlug, { skillId: result.data?.slug });
       return errResult('Import failed: ' + result.error);
@@ -139,7 +151,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
     label: 'ZCrystal Adapter Export',
     description: 'Export a ZCrystal skill to OpenClaw',
     parameters: Type.Object({ skillId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const result = await state.skillAdapter.exportSkill(params.skillId);
       if (result.ok) return okResult('Exported: ' + params.skillId);
       return errResult('Export failed: ' + result.error);
@@ -167,7 +181,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
       taskId: Type.String(), taskType: Type.String(),
       input: Type.Record(Type.String(), Type.Any()), output: Type.Record(Type.String(), Type.Any()),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const replayCase = state.replayRunner.saveReplayCase(params.taskId, params.taskType, params.input, params.output);
       return okResult('Replay case saved', { caseId: replayCase.id });
     },
@@ -178,7 +194,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
     label: 'ZCrystal Replay Get',
     description: 'Get a replay case by ID',
     parameters: Type.Object({ caseId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const replayCase = state.replayRunner.getCase(params.caseId);
       if (replayCase) return okResult(JSON.stringify(replayCase, null, 2));
       return errResult('Replay case not found');
@@ -190,7 +208,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
     label: 'ZCrystal Replay List',
     description: 'List replay cases by task type',
     parameters: Type.Object({ taskType: Type.Optional(Type.String()) }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       let cases: ReplayCase[] = [];
       if (params.taskType) cases = state.replayRunner.getCasesForTaskType(params.taskType);
       return okResult(JSON.stringify(cases, null, 2), { count: cases?.length || 0 });
@@ -213,7 +233,9 @@ export function registerWorkflowTools(api: OpenClawPluginApi, state: PluginState
     label: 'ZCrystal Replay Rollback',
     description: 'Rollback a skill to the previous version',
     parameters: Type.Object({ skillId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const result = state.replayRunner.rollback(params.skillId);
       if (result.success) return okResult('Rolled back to: ' + result.previousVersion);
       return errResult(result.error || 'Rollback failed');

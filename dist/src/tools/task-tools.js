@@ -17,7 +17,10 @@ export function registerTaskTools(api, state) {
             input: Type.Optional(Type.Record(Type.String(), Type.Any())),
             max_retries: Type.Optional(Type.Number()),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const result = await state.router.createTask({
                 task_type: params.task_type,
                 trigger: params.trigger,
@@ -37,7 +40,10 @@ export function registerTaskTools(api, state) {
         label: 'ZCrystal Task Get',
         description: 'Get task by ID',
         parameters: Type.Object({ taskId: Type.String() }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const result = await state.router.getTask(params.taskId);
             if (result.success)
                 return okResult('Task retrieved', result.data);
@@ -65,7 +71,10 @@ export function registerTaskTools(api, state) {
         parameters: Type.Object({
             layer: Type.String(), key: Type.String(), value: Type.Any(), ttl: Type.Optional(Type.Number()),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const result = await state.router.memoryStoreData(params.layer, params.key, params.value, params.ttl);
             if (result.success)
                 return okResult('Memory stored in ' + params.layer);
@@ -78,7 +87,10 @@ export function registerTaskTools(api, state) {
         label: 'ZCrystal Memory Load',
         description: 'Load from memory layers',
         parameters: Type.Object({ layer: Type.String(), key: Type.String() }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const result = await state.router.memoryLoad(params.layer, params.key);
             if (result.success)
                 return okResult(String(result.data ?? 'Memory not found'));
@@ -91,7 +103,10 @@ export function registerTaskTools(api, state) {
         label: 'ZCrystal Memory Search',
         description: 'Search memory across all layers',
         parameters: Type.Object({ query: Type.String() }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const result = await state.router.memorySearch(params.query);
             if (result?.success)
                 return okResult(JSON.stringify(result.data, null, 2), { count: result.data?.length });
@@ -104,7 +119,10 @@ export function registerTaskTools(api, state) {
         label: 'ZCrystal Memory Delete',
         description: 'Delete a memory entry',
         parameters: Type.Object({ layer: Type.String(), key: Type.String() }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const result = await state.router.memoryDelete(params.layer, params.key);
             if (result?.success)
                 return okResult('Memory deleted');
@@ -130,7 +148,10 @@ export function registerTaskTools(api, state) {
         label: 'ZCrystal Model Pick',
         description: 'Pick best model for task',
         parameters: Type.Object({ taskType: Type.String(), constraints: Type.Optional(Type.Record(Type.String(), Type.Any())) }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+            const params = _params;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = params;
             const result = await state.router.pickModel(params.taskType, params.constraints);
             if (result.success)
                 return okResult('Model selected', result.data);

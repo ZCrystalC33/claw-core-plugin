@@ -593,7 +593,8 @@ export default definePluginEntry({
       label: 'ZCrystal FTS5 Search',
       description: 'Search conversation history using FTS5 full-text search',
       parameters: Type.Object({ query: Type.String(), limit: Type.Optional(Type.Number()) }),
-      async execute(_id, params) {
+      async execute(_id, _params) {
+        const params = _params as any;
         const result = await fts5Search(params.query, params.limit || 20);
         if (result.success) return okResult(result.data as string);
         return errResult(result.error ?? 'FTS5 search failed');
@@ -627,7 +628,7 @@ export default definePluginEntry({
           params: Type.Record(Type.String(), Type.Any()),
           taskId: Type.Optional(Type.String()),
         }),
-        async execute(_id, args) {
+        async execute(_id, _args) { const args = _args as any;
           if (!zcState) return errResult('Plugin not initialized');
           const result = await zcState.toolHub.doToolCall(args.toolName, args.params, args.taskId);
           if (result.success) {
@@ -642,7 +643,8 @@ export default definePluginEntry({
         label: 'ZCrystal ToolHub Schema',
         description: 'Get tool schema by name from ToolHub',
         parameters: Type.Object({ name: Type.String() }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+          const params = _params as any;
           if (!zcState) return errResult('Plugin not initialized');
           const schema = zcState.toolHub.getToolSchema(params.name);
           if (schema) return okResult(JSON.stringify(schema, null, 2));
@@ -655,7 +657,8 @@ export default definePluginEntry({
         label: 'ZCrystal ToolHub Logs',
         description: 'Get recent tool execution logs',
         parameters: Type.Object({ limit: Type.Optional(Type.Number()) }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+          const params = _params as any;
           if (!zcState) return errResult('Plugin not initialized');
           const logs = zcState.toolHub.getLogs(undefined, params.limit || 100);
           return okResult(JSON.stringify(logs, null, 2), { count: logs.length });
@@ -674,7 +677,8 @@ export default definePluginEntry({
           examples: Type.Optional(Type.Array(Type.Any())),
           edgeCases: Type.Optional(Type.Array(Type.Any())),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+          const params = _params as any;
           if (!zcState) return errResult('Plugin not initialized');
           const generated = await zcState.skillGenerator.generateFromTask(
             params.taskType, params.toolChain, params.parameters || {},
@@ -754,7 +758,8 @@ export default definePluginEntry({
         label: 'ZCrystal Rate Check',
         description: 'Check if operation is allowed (Agent-internal)',
         parameters: Type.Object({ tokens: Type.Optional(Type.Number()) }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+          const params = _params as any;
           if (!zcState) return errResult('Plugin not initialized');
           const allowed = zcState.rateLimiter.isAllowed(params.tokens || 1);
           return okResult(allowed ? 'Rate limit allows execution' : 'Rate limit exceeded - operation blocked');
@@ -771,7 +776,8 @@ export default definePluginEntry({
           message: Type.String(),
           context: Type.Optional(Type.Record(Type.String(), Type.Any())),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+          const params = _params as any;
           if (!zcState) return errResult('Plugin not initialized');
           if (params.level === 'info') zcState.logger.info(params.message, params.context || {});
           else if (params.level === 'warn') zcState.logger.warning(params.message, params.context || {});
@@ -803,7 +809,8 @@ export default definePluginEntry({
           durationMs: Type.Optional(Type.Number()),
           success: Type.Optional(Type.Boolean()),
         }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+          const params = _params as any;
           if (!zcState) return errResult('Plugin not initialized');
           if (params.type === 'task') {
             if (params.success === false) {
@@ -824,7 +831,8 @@ export default definePluginEntry({
         label: 'ZCrystal Evolution Control',
         description: 'Enable or disable auto-evolution scheduler',
         parameters: Type.Object({ action: Type.Union([Type.Literal('start'), Type.Literal('stop'), Type.Literal('status')]) }),
-        async execute(_id, params) {
+        async execute(_id, _params) {
+          const params = _params as any;
           if (!zcState || !zcState.evolutionScheduler) return errResult('Plugin not initialized or scheduler unavailable');
           if (params.action === 'start') {
             zcState.evolutionScheduler.start();

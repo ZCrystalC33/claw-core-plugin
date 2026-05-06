@@ -29,7 +29,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
       skillId: Type.String(), content: Type.String(), title: Type.String(),
       taskType: Type.String(), tags: Type.Optional(Type.Array(Type.String())),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const version = await state.skillVersioning.createVersion(params.skillId, params.content,
         { title: params.title, taskType: params.taskType, tags: params.tags || [], createdAt: Date.now(), updatedAt: Date.now(), wasAutomated: false });
       return okResult('Version created: ' + version.version, { versionId: version.id });
@@ -41,7 +43,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Version Get',
     description: 'Get a specific version of a skill',
     parameters: Type.Object({ skillId: Type.String(), version: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const version = await state.skillVersioning.getVersion(params.skillId, params.version);
       if (version) return okResult(JSON.stringify(version, null, 2));
       return errResult('Version not found');
@@ -53,7 +57,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Version List',
     description: 'List all versions of a skill',
     parameters: Type.Object({ skillId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const versions = await state.skillVersioning.listVersions(params.skillId);
       return okResult(JSON.stringify(versions, null, 2), { count: versions.length });
     },
@@ -64,7 +70,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Version Diff',
     description: 'Compute diff between two versions',
     parameters: Type.Object({ skillId: Type.String(), fromVersion: Type.String(), toVersion: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const from = await state.skillVersioning.getVersion(params.skillId, params.fromVersion);
       const to = await state.skillVersioning.getVersion(params.skillId, params.toVersion);
       if (!from || !to) return errResult('Version not found');
@@ -89,7 +97,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Version Rollback',
     description: 'Rollback to a specific version',
     parameters: Type.Object({ skillId: Type.String(), version: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const success = await state.skillVersioning.rollback(params.skillId, params.version);
       if (success) return okResult('Rolled back to: ' + params.version);
       return errResult('Rollback failed');
@@ -102,7 +112,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Indexer Search',
     description: 'Search indexed skills',
     parameters: Type.Object({ query: Type.String(), limit: Type.Optional(Type.Number()) }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const results = await state.skillIndexer.search({ query: params.query, topK: params.limit || 10 });
       return okResult(JSON.stringify(results, null, 2), { count: results.length });
     },
@@ -113,7 +125,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Indexer Index',
     description: 'Index a skill for search',
     parameters: Type.Object({ skillId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const skillResult = await state.skillManager.getSkill(params.skillId);
       if (!skillResult.ok || !skillResult.data) return errResult('Skill not found: ' + params.skillId);
       await state.skillIndexer.indexSkill(skillResult.data);
@@ -168,7 +182,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Validator Validate',
     description: 'Validate skill content',
     parameters: Type.Object({ content: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const result = state.skillValidator.validate(params.content);
       return okResult(JSON.stringify(result, null, 2), { valid: result.valid });
     },
@@ -179,7 +195,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Validator Validate Sync',
     description: 'Quick sync validation of skill content',
     parameters: Type.Object({ content: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const valid = state.skillValidator.validateSync(params.content);
       return okResult(valid ? 'Valid' : 'Invalid', { valid });
     },
@@ -191,7 +209,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Merger Suggest',
     description: 'Suggest skill merges based on similarity',
     parameters: Type.Object({ skills: Type.Array(Type.String()) }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const result = state.skillMerger.suggestMerges(params.skills);
       return okResult(JSON.stringify(result, null, 2), { count: result.length });
     },
@@ -203,7 +223,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Skill Versions',
     description: 'Get version history for a skill',
     parameters: Type.Object({ skillId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const result = await state.router.getSkillVersions(params.skillId);
       if (result.success) return okResult(JSON.stringify(result.data, null, 2), { count: result.data?.versions?.length || 0 });
       return errResult(result.error ?? 'Failed to get skill versions');
@@ -215,7 +237,9 @@ export function registerSkillTools(api: OpenClawPluginApi, state: PluginState) {
     label: 'ZCrystal Skill Rollback',
     description: 'Rollback skill to a specific version',
     parameters: Type.Object({ skillId: Type.String(), version: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const result = await state.router.rollbackSkill(params.skillId, params.version);
       if (result.success) return okResult('Rolled back to version: ' + params.version);
       return errResult(result.error ?? 'Rollback failed');

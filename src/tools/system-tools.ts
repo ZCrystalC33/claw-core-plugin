@@ -40,7 +40,9 @@ export function registerSystemTools(api: OpenClawPluginApi, state: PluginState) 
       success: Type.Boolean(), durationMs: Type.Number(), userId: Type.String(),
       error: Type.Optional(Type.String()),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       state.reviewEngine.onTaskCompleted(params.taskId, params.taskType, params.toolChain, params.success, params.durationMs, params.userId, params.error);
       return okResult('Recorded: ' + params.taskId);
     },
@@ -58,7 +60,9 @@ export function registerSystemTools(api: OpenClawPluginApi, state: PluginState) 
       name: Type.Union([Type.Literal('message:received'), Type.Literal('after_tool_call'), Type.Literal('before_prompt_build')]),
       handler: Type.String(), // Serialized handler reference
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       // FIX: Actually register the hook handler locally
       if (!customHooks.has(params.name)) {
         customHooks.set(params.name, []);
@@ -83,7 +87,9 @@ export function registerSystemTools(api: OpenClawPluginApi, state: PluginState) 
       name: Type.Union([Type.Literal('message:received'), Type.Literal('after_tool_call'), Type.Literal('before_prompt_build')]),
       context: Type.Optional(Type.Record(Type.String(), Type.Any())),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       const ctx = params.context || {};
       // Dispatch to @zcrystal/evo hookRegistry first
       await state.hookRegistry.dispatch(params.name, ctx);
@@ -134,7 +140,9 @@ export function registerSystemTools(api: OpenClawPluginApi, state: PluginState) 
     label: 'ZCrystal Coordinator Register',
     description: 'Register a skill for evolution',
     parameters: Type.Object({ skillId: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = params as any;
       await state.evolutionCoordinator.evolveOne(params.skillId, '');
       return okResult('Evolution triggered for: ' + params.skillId);
     },

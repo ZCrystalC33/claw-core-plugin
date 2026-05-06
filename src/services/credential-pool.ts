@@ -211,7 +211,7 @@ function registerCredentialTools(api: OpenClawPluginApi, state: PoolState): void
     label: 'ZCrystal Credential List',
     description: 'List all registered API credentials with status',
     parameters: Type.Object({ provider: Type.Optional(Type.String()) }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       if (!state.initialized) return makeErr('Credential pool not initialized');
       const keys = params.provider
         ? [...state.keys.values()].filter(k => k.provider === params.provider)
@@ -239,7 +239,7 @@ function registerCredentialTools(api: OpenClawPluginApi, state: PoolState): void
       key: Type.String(),
       provider: Type.String(),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       if (!state.initialized) return makeErr('Credential pool not initialized');
       if (state.keys.has(params.id)) {
         return makeErr(`Credential with id "${params.id}" already exists`);
@@ -268,7 +268,7 @@ function registerCredentialTools(api: OpenClawPluginApi, state: PoolState): void
     label: 'ZCrystal Credential Remove',
     description: 'Remove a credential from the pool by id',
     parameters: Type.Object({ id: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       if (!state.initialized) return makeErr('Credential pool not initialized');
       if (!state.keys.has(params.id)) return makeErr(`Credential "${params.id}" not found`);
       const key = state.keys.get(params.id)!;
@@ -284,7 +284,7 @@ function registerCredentialTools(api: OpenClawPluginApi, state: PoolState): void
     label: 'ZCrystal Credential Rotate',
     description: 'Mark a key as rotating so it gets replaced on next use',
     parameters: Type.Object({ id: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       if (!state.initialized) return makeErr('Credential pool not initialized');
       const key = state.keys.get(params.id);
       if (!key) return makeErr(`Credential "${params.id}" not found`);
@@ -306,7 +306,7 @@ function registerCredentialTools(api: OpenClawPluginApi, state: PoolState): void
       success: Type.Boolean(),
       latencyMs: Type.Optional(Type.Number()),
     }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       if (!state.initialized) return makeErr('Credential pool not initialized');
       const key = getActiveKeyByProvider(state, params.provider);
       if (!key) return makeErr(`No active credential found for provider "${params.provider}"`);
@@ -367,7 +367,7 @@ function registerCredentialTools(api: OpenClawPluginApi, state: PoolState): void
     label: 'ZCrystal Credential Reset Circuit',
     description: 'Manually reset circuit breaker for a key',
     parameters: Type.Object({ id: Type.String() }),
-    async execute(_id, params) {
+    async execute(_id, _params) { const params = _params as any;
       if (!state.initialized) return makeErr('Credential pool not initialized');
       const key = state.keys.get(params.id);
       if (!key) return makeErr(`Credential "${params.id}" not found`);
