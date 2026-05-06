@@ -31,8 +31,8 @@ import sys
 sys.path.insert(0, '${CORE_CWD}/src')
 from efficiency_core.monitor import get_monitor
 m = get_monitor()
-summary = m.get_progress_summary()
-print(str(summary) if summary else 'no_progress')
+summary = m.get_overall_progress()
+print(str(summary))
 `;
             const raw = runPython(script);
             return okResult(raw || 'no_progress');
@@ -64,21 +64,39 @@ print(str(tasks) if tasks else 'no_active')
         description: 'Track progress of a specific task',
         parameters: Type.Object({
             task_id: Type.String({ description: 'Task ID to track' }),
-            status: Type.Optional(Type.String()),
+            action: Type.Optional(Type.String({ description: 'complete|fail|start' })),
         }),
         async execute(_id, _params) {
             const params = _params;
-            const script = `
+            let script;
+            if (params.action === 'complete') {
+                script = `
 import sys
 sys.path.insert(0, '${CORE_CWD}/src')
 from efficiency_core.monitor import get_monitor
 m = get_monitor()
-if '${params.status}':
-    m.complete_task('${params.task_id}')
-else:
-    result = m.get_task_summary('${params.task_id}')
-    print(str(result) if result else 'not_found')
+m.complete_task('${params.task_id}')
+print('completed')
 `;
+            } else if (params.action === 'start') {
+                script = `
+import sys
+sys.path.insert(0, '${CORE_CWD}/src')
+from efficiency_core.monitor import get_monitor
+m = get_monitor()
+m.start_task('${params.task_id}')
+print('started')
+`;
+            } else {
+                script = `
+import sys
+sys.path.insert(0, '${CORE_CWD}/src')
+from efficiency_core.monitor import get_monitor
+m = get_monitor()
+result = m.get_task_summary('${params.task_id}')
+print(str(result) if result else 'not_found')
+`;
+            }
             const raw = runPython(script);
             return okResult(raw || 'ok');
         },

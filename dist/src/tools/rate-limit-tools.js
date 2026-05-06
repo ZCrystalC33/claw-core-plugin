@@ -23,9 +23,10 @@ export function registerRateLimitTools(api) {
     api.registerTool({
         name: 'clawcore_rate_limit_check',
         label: '⚡ ClawCore Rate Limit Check',
-        description: 'Check if action is allowed under rate limit',
+        description: 'Check if action is allowed under rate limit for a bucket and key',
         parameters: Type.Object({
-            key: Type.String({ description: 'Rate limit key to check' }),
+            bucket: Type.String({ description: 'Bucket name' }),
+            key: Type.String({ description: 'Key within the bucket' }),
         }),
         async execute(_id, _params) {
             const params = _params;
@@ -33,23 +34,26 @@ export function registerRateLimitTools(api) {
 import sys
 sys.path.insert(0, '${CORE_CWD}/src')
 from efficiency_core.rate_limit import RateLimiter
-rl = RateLimiter.get_instance()
-allowed = rl.check('${params.key}')
-print('allowed' if allowed else 'denied')
+rl = RateLimiter()
+try:
+    result = rl.check('${params.bucket}', '${params.key}')
+    print('allowed' if result and result[0] else 'denied')
+except Exception as e:
+    print('error:', str(e)[:50])
 `;
             const raw = runPython(script);
-            return okResult(raw || 'denied');
+            return okResult(raw || 'check_failed');
         },
     });
 
     api.registerTool({
         name: 'clawcore_rate_limit_add',
-        label: '➕ ClawCore Add Rate Limit',
-        description: 'Add a new rate limit bucket',
+        label: '➕ ClawCore Add Rate Limit Bucket',
+        description: 'Add a rate limit bucket with max calls and window',
         parameters: Type.Object({
-            key: Type.String(),
-            max_calls: Type.Number(),
-            window_seconds: Type.Number(),
+            bucket: Type.String({ description: 'Bucket name' }),
+            max_calls: Type.Number({ description: 'Max calls per window' }),
+            window_seconds: Type.Number({ description: 'Window size in seconds' }),
         }),
         async execute(_id, _params) {
             const params = _params;
@@ -57,8 +61,8 @@ print('allowed' if allowed else 'denied')
 import sys
 sys.path.insert(0, '${CORE_CWD}/src')
 from efficiency_core.rate_limit import RateLimiter
-rl = RateLimiter.get_instance()
-rl.add_bucket('${params.key}', ${params.max_calls}, ${params.window_seconds})
+rl = RateLimiter()
+rl.add_limit('${params.bucket}', ${params.max_calls}, ${params.window_seconds})
 print('bucket_added')
 `;
             const raw = runPython(script);
@@ -69,16 +73,16 @@ print('bucket_added')
     api.registerTool({
         name: 'clawcore_rate_limit_stats',
         label: '📊 ClawCore Rate Limit Stats',
-        description: 'Get rate limiter statistics',
+        description: 'Get all rate limiter buckets and their limits',
         parameters: Type.Object({}),
         async execute(_id, _params) {
             const script = `
 import sys
 sys.path.insert(0, '${CORE_CWD}/src')
 from efficiency_core.rate_limit import RateLimiter
-rl = RateLimiter.get_instance()
+rl = RateLimiter()
 limits = rl.get_limit()
-print(str(limits) if limits else 'no_limits')
+print(str(limits))
 `;
             const raw = runPython(script);
             return okResult(raw || 'no_stats');

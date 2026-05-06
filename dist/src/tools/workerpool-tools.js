@@ -32,7 +32,7 @@ sys.path.insert(0, '${CORE_CWD}/src')
 from efficiency_core.workerpool import WorkerPool
 wp = WorkerPool()
 stats = wp.get_all_stats()
-print(str(stats) if stats else 'no_stats')
+print(f"size={wp.size}, active={wp.active_count}, stats={stats}")
 `;
             const raw = runPython(script);
             return okResult(raw || 'no_stats');
@@ -54,8 +54,7 @@ import sys
 sys.path.insert(0, '${CORE_CWD}/src')
 from efficiency_core.workerpool import WorkerPool
 wp = WorkerPool()
-task_id = '${params.task_id}'
-wp.submit(task_id, '${params.task.replace(/'/g, "\\'")}')
+wp.submit('${params.task_id}', '${params.task.replace(/'/g, "\\'")}')
 print('submitted')
 `;
             const raw = runPython(script);
@@ -74,7 +73,7 @@ import sys
 sys.path.insert(0, '${CORE_CWD}/src')
 from efficiency_core.workerpool import WorkerPool
 wp = WorkerPool()
-print(f"size={wp.size()}, active={wp.active_count()}")
+print(f"size={wp.size}, active={wp.active_count}")
 `;
             const raw = runPython(script);
             return okResult(raw || 'unknown');
