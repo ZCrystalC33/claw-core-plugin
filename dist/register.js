@@ -53,7 +53,7 @@ function clearRecallContext() {
 // ZCrystal Evo Imports (via @zcrystal/evo symlink)
 // =====================================================================
 import { UnifiedApiRouter, createHonchoClient, createSkillManager, SelfEvolutionEngine, EvolutionCoordinator, EvolutionScheduler, ReviewEngine, ToolHub, SkillGenerator, SkillVersioning, SkillIndexer, SkillValidator, SkillMerger, CircuitBreaker, RateLimiter, StructuredLogger, Metrics, WorkflowEngine, OpenClawSkillAdapter, SkillSyncManager, ReplayRunner, HookRegistry, DiskStore, EvolutionStore, TraceStore, } from '@zcrystal/evo';
-import { registerCoreTools, registerTaskTools, registerSkillTools, registerWorkflowTools, registerSystemTools, registerProactiveTools, } from './src/tools/index.js';
+import { registerCoreTools, registerTaskTools, registerSkillTools, registerWorkflowTools, registerSystemTools, registerProactiveTools, registerHealthTools, registerMetricsTools, registerPipelineTools, registerDecomposeRouterTools, } from './src/tools/index.js';
 import { registerSignalTools } from './src/routes/signals.js';
 let zcState = null;
 function okResult(text, details) {
@@ -440,6 +440,10 @@ export default definePluginEntry({
             registerWorkflowTools(api, zcState);
             registerSystemTools(api, zcState);
             registerProactiveTools(api, zcState);
+            registerHealthTools(api);
+            registerMetricsTools(api);
+            registerPipelineTools(api);
+            registerDecomposeRouterTools(api);
             registerSignalTools(api, zcState);
         }
         // =====================================================================

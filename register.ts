@@ -111,6 +111,10 @@ import {
   registerWorkflowTools,
   registerSystemTools,
   registerProactiveTools,
+  registerHealthTools,
+  registerMetricsTools,
+  registerPipelineTools,
+  registerDecomposeRouterTools,
 } from './src/tools/index.js';
 import { registerSignalTools } from './src/routes/signals.js';
 
@@ -581,6 +585,10 @@ export default definePluginEntry({
       registerWorkflowTools(api, zcState as any);
       registerSystemTools(api, zcState as any);
       registerProactiveTools(api, zcState as any);
+      registerHealthTools(api);
+      registerMetricsTools(api);
+      registerPipelineTools(api);
+      registerDecomposeRouterTools(api);
       registerSignalTools(api, zcState as any);
     }
 
