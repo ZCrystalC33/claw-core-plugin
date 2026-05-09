@@ -72,7 +72,7 @@ export function estimateTokens(text) {
  */
 export function createContextCompressorHook(_api) {
     return {
-        name: 'zcrystal:context-compressor',
+        name: 'clawcore:context-compressor',
         hookKey: 'message:preprocessed',
         async handler(ctx) {
             // Extract conversation messages from context if present

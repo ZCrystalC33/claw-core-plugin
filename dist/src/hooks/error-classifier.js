@@ -108,7 +108,7 @@ export function classifyError(errorMessage) {
  */
 export function createErrorClassifierHook(_api) {
     return {
-        name: 'zcrystal:error-classifier',
+        name: 'clawcore:error-classifier',
         hookKey: 'after_tool_call',
         async handler(event) {
             if (!event.error)

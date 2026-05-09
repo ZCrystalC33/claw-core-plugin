@@ -10,6 +10,7 @@
 import { definePluginEntry } from 'openclaw/plugin-sdk/plugin-entry';
 import { Type } from '@sinclair/typebox';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createToolRegistryService } from './tools/tool-registry.js';
 import { createInsightsService } from './tools/insights-engine.js';
 // =====================================================================
@@ -23,7 +24,7 @@ import { classifyError } from './src/hooks/error-classifier.js';
 import { createCredentialPoolService } from './src/services/credential-pool.js';
 import { createMcpBridgeService } from './src/services/mcp-bridge.js';
 // ZCrystal utils
-import { stripPrivateTags } from './src/utils/privacy-filter.js';
+import { stripPrivateTags } from './src/intelligence/utils/privacy-filter.js';
 // ZCrystal memory modules (for FTS5 integration)
 import { UNCERTAINTY_MARKERS } from './src/memory/recall.js';
 // ZCrystal config
@@ -54,7 +55,7 @@ function clearRecallContext() {
 // =====================================================================
 import { UnifiedApiRouter, createHonchoClient, createSkillManager, SelfEvolutionEngine, EvolutionCoordinator, EvolutionScheduler, ReviewEngine, ToolHub, SkillGenerator, SkillVersioning, SkillIndexer, SkillValidator, SkillMerger, CircuitBreaker, RateLimiter, StructuredLogger, Metrics, WorkflowEngine, OpenClawSkillAdapter, SkillSyncManager, ReplayRunner, HookRegistry, DiskStore, EvolutionStore, TraceStore, } from '@zcrystal/evo';
 import { registerBulkheadTools, registerCacheTools, registerContextEngineTools, registerCoreTools, registerCredentialPoolTools, registerBenchmarkTools, registerDecomposeRouterTools, registerDecomposerTools, registerErrorClassifierTools, registerEventsTools, registerFeaturesTools, registerHealthTools, registerLazyTools, registerLockTools, registerMetricsTools, registerMiddlewareTools, registerMonitorTools, registerPipelineTools, registerProactiveTools, registerQuotaTools, registerRateLimitTools, registerRegistryTools, registerRetryTools, registerSerializersTools, registerCircuitBreakerTools, registerCoordinatorTools, registerSkillSystemTools, registerSkillTools, registerSystemTools, registerTaskTools, registerTelemetryTools, registerWorkerpoolTools, registerWorkflowTools, } from './src/tools/index.js';
-import { registerSignalTools } from './src/routes/signals.js';
+import { registerSignalTools } from './src/signals/tools.js';
 let zcState = null;
 function okResult(text, details) {
     return { content: [{ type: 'text', text }], details: details ?? {} };
@@ -298,7 +299,7 @@ class SkillManager {
 }
 const skillManager = new SkillManager();
 function getSkillsDir() {
-    return path.join(path.dirname(__filename), 'skills');
+    return path.join(path.dirname(fileURLToPath(import.meta.url)), 'skills');
 }
 // ============================================================================
 // Plugin Entry Point
@@ -977,7 +978,7 @@ export default definePluginEntry({
             }
         }, { name: 'zcrystal:context-compressor' });
         // Error Classifier Hook
-        api.on('after_tool_call', async (event) => {
+        api.registerHook('after_tool_call', async (event) => {
             if (!zcState)
                 return;
             const errCtx = event;
@@ -999,7 +1000,7 @@ export default definePluginEntry({
             errCtx._zcrystal_error_classification = classification;
         });
         // Self-Doubt Recall - Part 1: llm_output captures uncertainty
-        api.on('llm_output', async (event) => {
+        api.registerHook('llm_output', async (event) => {
             if (!zcState)
                 return;
             const llmEvent = event;
@@ -1028,7 +1029,7 @@ export default definePluginEntry({
             }
         });
         // Self-Doubt Recall - Part 2: before_prompt_build injects recall
-        api.on('before_prompt_build', async (event) => {
+        api.registerHook('before_prompt_build', async (event) => {
             if (!zcState)
                 return;
             const recallCtx = getRecallContext();

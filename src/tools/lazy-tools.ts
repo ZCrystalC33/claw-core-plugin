@@ -1,2 +1,17 @@
-// Re-export from dist (TypeScript build stub)
-export { registerLazyTools } from '../../dist/src/tools/lazy-tools.js';
+// STUB - Lazy tools
+import { Type } from '@sinclair/typebox';
+import { okResult } from '../index.js';
+
+export function registerLazyTools(api) {
+    api.registerTool({
+        name: 'lazy_resolve',
+        label: 'Lazy Resolve',
+        description: 'Resolve lazy-loaded value',
+        parameters: Type.Object({
+            key: Type.String(),
+        }),
+        async execute(_id, params) {
+            return okResult(`[Lazy] ${params.key}=null (stub)`);
+        },
+    });
+}

@@ -12,6 +12,7 @@ import { definePluginEntry } from 'openclaw/plugin-sdk/plugin-entry';
 import { Type } from '@sinclair/typebox';
 import type { OpenClawPluginApi } from 'openclaw/plugin-sdk/plugin-entry';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createToolRegistryService } from './tools/tool-registry.js';
 import { createInsightsService } from './tools/insights-engine.js';
 
@@ -29,7 +30,7 @@ import { createCredentialPoolService } from './src/services/credential-pool.js';
 import { createMcpBridgeService } from './src/services/mcp-bridge.js';
 
 // ZCrystal utils
-import { stripPrivateTags } from './src/utils/privacy-filter.js';
+import { stripPrivateTags } from './src/intelligence/utils/privacy-filter.js';
 
 // ZCrystal memory modules (for FTS5 integration)
 import { UNCERTAINTY_MARKERS } from './src/memory/recall.js';
@@ -139,7 +140,7 @@ import {
   registerWorkerpoolTools,
   registerWorkflowTools,
 } from './src/tools/index.js';
-import { registerSignalTools } from './src/routes/signals.js';
+import { registerSignalTools } from './src/signals/tools.js';
 
 // ============================================================================
 // ZCrystal Plugin State
@@ -444,7 +445,7 @@ class SkillManager {
 const skillManager = new SkillManager();
 
 function getSkillsDir(): string {
-  return path.join(path.dirname(__filename), 'skills');
+  return path.join(path.dirname(fileURLToPath(import.meta.url)), 'skills');
 }
 
 // ============================================================================
@@ -1157,7 +1158,7 @@ export default definePluginEntry({
     }, { name: 'zcrystal:context-compressor' });
 
     // Error Classifier Hook
-    api.on('after_tool_call', async (event: unknown) => {
+    api.registerHook('after_tool_call', async (event: unknown) => {
       if (!zcState) return;
       const errCtx = event as { toolName?: string; error?: string; durationMs?: number; [key: string]: unknown };
       if (!errCtx.error) return;
@@ -1180,7 +1181,7 @@ export default definePluginEntry({
     });
 
     // Self-Doubt Recall - Part 1: llm_output captures uncertainty
-    api.on('llm_output', async (event: unknown) => {
+    api.registerHook('llm_output', async (event: unknown) => {
       if (!zcState) return;
       const llmEvent = event as { assistantTexts?: string[] };
       const texts = llmEvent.assistantTexts || [];
@@ -1212,7 +1213,7 @@ export default definePluginEntry({
     });
 
     // Self-Doubt Recall - Part 2: before_prompt_build injects recall
-    api.on('before_prompt_build', async (event: unknown) => {
+    api.registerHook('before_prompt_build', async (event: unknown) => {
       if (!zcState) return;
       
       const recallCtx = getRecallContext();

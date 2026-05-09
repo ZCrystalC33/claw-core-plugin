@@ -118,7 +118,7 @@ export function estimateTokens(text: string): number {
  */
 export function createContextCompressorHook(_api: OpenClawPluginApi) {
   return {
-    name: 'zcrystal:context-compressor',
+    name: 'clawcore:context-compressor',
     hookKey: 'message:preprocessed',
     async handler(ctx: MessagePreprocessedContext) {
       // Extract conversation messages from context if present

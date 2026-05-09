@@ -49,6 +49,7 @@ export function createToolRegistryService(api) {
     const cwd = '/home/snow/.openclaw/workspace/openclaw-efficiency-core';
     return {
         name: 'claw-core-tool-registry',
+        id: 'claw-core-tool-registry',
         async onStart() {
             console.log('[Claw_Core] ToolRegistry: Starting discovery...');
             const pythonTools = discoverPythonTools();

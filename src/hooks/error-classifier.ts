@@ -154,7 +154,7 @@ type AfterToolCallContext = {
  */
 export function createErrorClassifierHook(_api: OpenClawPluginApi) {
   return {
-    name: 'zcrystal:error-classifier',
+    name: 'clawcore:error-classifier',
     hookKey: 'after_tool_call',
     async handler(event: AfterToolCallContext) {
       if (!event.error) return; // No error to classify

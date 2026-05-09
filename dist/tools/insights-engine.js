@@ -87,6 +87,7 @@ except Exception as e:
 export function createInsightsService(api) {
     return {
         name: 'claw-core-insights',
+        id: 'claw-core-insights',
         async onStart() {
             console.log('[Claw_Core] Insights: Starting...');
             // =====================================================================

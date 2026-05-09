@@ -1,29 +1,55 @@
 {
-  "id": "claw-core",
-  "name": "Claw_Core",
-  "description": "Claw_Core System: decompose, route-task, benchmark, insights",
-  "version": "1.5.1",
-  "main": "register.js",
-  "configSchema": {
-    "type": "object",
-    "properties": {
-      "enabled": {
-        "type": "boolean",
-        "default": true,
-        "description": "Enable Claw_Core plugin"
-      },
-      "fts5Url": {
-        "type": "string",
-        "default": "http://localhost:18789/mcp",
-        "description": "FTS5 MCP server URL"
-      }
-    }
-  },
-  "openclaw": {
-    "minVersion": "2026.4.0",
-    "skills": {
-      "dir": "skills",
-      "autoScan": true
-    }
-  }
+    "id": "claw-core",
+    "name": "Claw_Core",
+    "description": "Claw_Core System: decompose, route-task, benchmark, insights",
+    "version": "1.5.1",
+    "main": "register.js",
+    "configSchema": {
+        "type": "object",
+        "properties": {
+            "enabled": {
+                "type": "boolean",
+                "default": true,
+                "description": "Enable Claw_Core plugin"
+            },
+            "fts5Url": {
+                "type": "string",
+                "default": "http://localhost:18789/mcp",
+                "description": "FTS5 MCP server URL"
+            }
+        }
+    },
+    "openclaw": {
+        "minVersion": "2026.4.0",
+        "skills": {
+            "dir": "skills",
+            "autoScan": true
+        }
+    },
+    "activation": {
+        "onCommands": [
+            "decompose",
+            "route",
+            "benchmark",
+            "insights"
+        ]
+    },
+    "commandAliases": [
+        {
+            "name": "decompose",
+            "cliCommand": "decompose"
+        },
+        {
+            "name": "route",
+            "cliCommand": "route"
+        },
+        {
+            "name": "benchmark",
+            "cliCommand": "benchmark"
+        },
+        {
+            "name": "insights",
+            "cliCommand": "insights"
+        }
+    ]
 }
