@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-05-10
+
+### Security (CRITICAL)
+- **H1/H2 Fix**: SQL injection in `decompose-router.ts` — use `runPythonWithStdin` for parameterization
+- **H3 Fix**: Command injection in `core-tools.ts` — pass query as spawn argv, not embedded string
+- **H4 Fix**: Plaintext API key storage in `credential-pool.ts` — moved to OS Keychain
+- **H5 Fix**: Race condition in `self-evolution.ts` — catch + finally dual cleanup for evolvingSkills Set
+
+### Added
+- **Real Decomposer Bridge** — `decomposer-tools.ts` now wires to actual Python `efficiency_core.decompose()`
+- **Unused Variable Cleanup** — Removed 60+ unused `const p = params as any;` declarations
+
+### Changed
+- TypeScript build verified clean (0 errors)
+
+---
+
 ## [1.5.1] - 2026-05-07
 
 ### Added
