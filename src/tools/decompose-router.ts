@@ -33,6 +33,31 @@ function runPython(script: string, timeoutMs = 30000): Promise<string> {
   });
 }
 
+function runPythonWithStdin(script: string, stdinData: unknown, timeoutMs = 30000): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const py = spawn('python3', ['-c', script]);
+    let stdout = '';
+    let stderr = '';
+    const timer = setTimeout(() => {
+      py.kill();
+      reject(new Error('Python subprocess timed out'));
+    }, timeoutMs);
+    py.stdout.on('data', (d) => (stdout += d.toString()));
+    py.stderr.on('data', (d) => (stderr += d.toString()));
+    py.on('close', (code) => {
+      clearTimeout(timer);
+      if (code === 0) resolve(stdout.trim());
+      else reject(new Error(stderr || `exit ${code}`));
+    });
+    py.on('error', (e) => {
+      clearTimeout(timer);
+      reject(e);
+    });
+    py.stdin.write(JSON.stringify(stdinData));
+    py.stdin.end();
+  });
+}
+
 export function registerDecomposeRouterTools(api: OpenClawPluginApi) {
   // ─── Decompose ───────────────────────────────────────────────────
   api.registerTool({
@@ -54,7 +79,8 @@ import json
 sys.path.insert(0, '${CORE_CWD}')
 from efficiency_core import decompose, TaskDecomposition
 
-result = decompose('${params.task.replace(/'/g, "\\'")}', max_subtasks=${max})
+input_data = json.load(sys.stdin)
+result = decompose(input_data['task'], max_subtasks=input_data.get('max_subtasks', ${max}))
 if hasattr(result, '__dict__'):
     result = vars(result)
 # Clean up any non-serializable fields
@@ -62,7 +88,7 @@ if isinstance(result, dict):
     result = {k: v for k, v in result.items() if k != 'tools' and k != 'registry'}
 print(json.dumps(result, default=str))
 `;
-        const raw = await runPython(script);
+        const raw = await runPythonWithStdin(script, { task: params.task, max_subtasks: max });
         const data = JSON.parse(raw);
         const lines = [`**Task:** ${params.task}`, '', '**Subtasks:**'];
         if (Array.isArray((data as any).subtasks ?? (data as any).steps)) {
@@ -94,21 +120,20 @@ print(json.dumps(result, default=str))
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const p = params as any;
       try {
-        const subtasks = params.subtasks.replace(/'/g, "\\'");
         const script = `
 import sys
 import json
 sys.path.insert(0, '${CORE_CWD}')
 from efficiency_core import TaskRouter, route_tasks
 
+input_data = json.load(sys.stdin)
 router = TaskRouter()
-subtasks = json.loads('${subtasks}')
-result = route_tasks(subtasks)
+result = route_tasks(input_data['subtasks'])
 if hasattr(result, '__dict__'):
     result = vars(result)
 print(json.dumps(result, default=str))
 `;
-        const raw = await runPython(script);
+        const raw = await runPythonWithStdin(script, { subtasks: JSON.parse(params.subtasks) });
         const data = JSON.parse(raw);
         const lines = ['**Routing Decisions:**'];
         if (Array.isArray(data.get('decisions') ?? data.get('routes'))) {
@@ -177,12 +202,13 @@ import json
 sys.path.insert(0, '${CORE_CWD}')
 from efficiency_core import quick_run
 
-result = quick_run('${params.task.replace(/'/g, "\\'")}')
+input_data = json.load(sys.stdin)
+result = quick_run(input_data['task'])
 if hasattr(result, '__dict__'):
     result = vars(result)
 print(json.dumps(result, default=str))
 `;
-        const raw = await runPython(script, 60000);
+        const raw = await runPythonWithStdin(script, { task: params.task }, 60000);
         const data = JSON.parse(raw);
         return okResult(JSON.stringify(data, null, 2));
       } catch (e: unknown) {

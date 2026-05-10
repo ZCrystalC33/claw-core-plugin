@@ -11,6 +11,7 @@ const INSIGHTS_DB = `${process.env.HOME}/.openclaw/claw-core-insights.db`;
 
 export interface InsightsService {
   name: string;
+  id: string;
   onStart: () => Promise<void>;
   onStop: () => Promise<void>;
 }
@@ -103,6 +104,7 @@ except Exception as e:
 export function createInsightsService(api: any): InsightsService {
   return {
     name: 'claw-core-insights',
+    id: 'claw-core-insights',
 
     async onStart() {
       console.log('[Claw_Core] Insights: Starting...');

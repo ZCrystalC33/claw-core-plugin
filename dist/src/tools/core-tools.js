@@ -52,14 +52,13 @@ export function registerCoreTools(api, state) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const p = params;
             const limit = params.limit || 10;
-            // FIX: Direct FTS5 search via Python subprocess (bypasses MCP HTTP dependency)
+            // H3 FIX: query passed as argv, not embedded in python string — prevents command injection
             try {
                 const { spawn } = await import('node:child_process');
                 const result = await new Promise((resolve, reject) => {
-                    const py = spawn('python3', [
-                        '-c',
-                        `import sys; sys.path.insert(0, '/home/snow/.openclaw'); from skills.fts5 import search; results = search(${JSON.stringify(params.query)}, limit=${limit}); print([[r['content'], r['sender'], r['timestamp']] for r in results], sep='\n')`
-                    ]);
+                    const py = spawn('python3', ['-c',
+                        'import sys; sys.path.insert(0,"/home/snow/.openclaw"); from skills.fts5 import search; import json; q=sys.argv[1] if len(sys.argv)>1 else ""; lim=int(sys.argv[2]) if len(sys.argv)>2 else 10; print(json.dumps([[r["content"],r["sender"],r["timestamp"]] for r in search(q,limit=lim)]))',
+                        params.query, String(limit)]);
                     let stdout = '';
                     let stderr = '';
                     py.stdout.on('data', (d) => stdout += d.toString());

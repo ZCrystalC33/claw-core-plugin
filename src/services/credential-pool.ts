@@ -78,33 +78,189 @@ function getDefaults(): Required<CredentialPoolConfig> {
   };
 }
 
-function loadKeysFromStore(state: PoolState): void {
+function isLinuxKeychainAvailable(): boolean {
   try {
-    const { readFileSync, existsSync } = require('node:fs') as typeof import('node:fs');
-    const credPath = `${process.env.HOME}/.openclaw/extensions/zcrystal/data/credentials.json`;
-    if (existsSync(credPath)) {
-      const raw = readFileSync(credPath, 'utf-8');
-      const arr: CredentialKey[] = JSON.parse(raw);
-      for (const k of arr) {
-        state.keys.set(k.id, k);
-      }
-      console.log('[ZCrystal:CredentialPool] Loaded', state.keys.size, 'credentials from store');
+    const { execSync } = require('node:child_process');
+    execSync('command -v secret-tool', { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isMacKeychainAvailable(): boolean {
+  try {
+    const { execSync } = require('node:child_process');
+    execSync('command -v security', { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function getOsKeychainType(): 'linux' | 'mac' | 'none' {
+  if (isLinuxKeychainAvailable()) return 'linux';
+  if (isMacKeychainAvailable()) return 'mac';
+  return 'none';
+}
+
+function storeCredentialToKeychain(id: string, credential: CredentialKey): boolean {
+  const keychainType = getOsKeychainType();
+  const { execSync } = require('node:child_process') as typeof import('node:child_process');
+  const json = JSON.stringify(credential);
+
+  try {
+    if (keychainType === 'linux') {
+      // Use secret-tool (GNOME Keyring / libsecret)
+      execSync(`secret-tool store --label="zcrystal/credentials/${id}" id "${id}" <<< "${json.replace(/"/g, '\\"')}"`, { stdio: 'ignore' });
+      return true;
+    } else if (keychainType === 'mac') {
+      // Use macOS Keychain
+      execSync(`security add-generic-password -a "zcrystal:${id}" -s "zcrystal-credentials" -w "${json.replace(/"/g, '\\"')}" -T ""`, { stdio: 'ignore' });
+      return true;
+    }
+  } catch (e) {
+    console.warn(`[ZCrystal:CredentialPool] Keychain store failed for "${id}":`, e);
+  }
+  return false;
+}
+
+function loadCredentialFromKeychain(id: string): CredentialKey | null {
+  const keychainType = getOsKeychainType();
+  if (keychainType === 'none') return null;
+
+  const { execSync } = require('node:child_process') as typeof import('node:child_process');
+
+  try {
+    let json: string;
+    if (keychainType === 'linux') {
+      json = execSync(`secret-tool lookup id "${id}"`, { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    } else if (keychainType === 'mac') {
+      json = execSync(`security find-generic-password -a "zcrystal:${id}" -s "zcrystal-credentials" -w`, { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    } else {
+      return null;
+    }
+    if (json) {
+      return JSON.parse(json) as CredentialKey;
     }
   } catch {
-    // File may not exist yet, that's fine
+    // Key not found or keychain unavailable
+  }
+  return null;
+}
+
+function loadAllCredentialsFromKeychain(): CredentialKey[] {
+  const keychainType = getOsKeychainType();
+  if (keychainType === 'none') return [];
+
+  const { execSync } = require('node:child_process') as typeof import('node:child_process');
+
+  try {
+    let ids: string[] = [];
+    if (keychainType === 'linux') {
+      // Search for all zcrystal credentials
+      const output = execSync('secret-tool search --all id "" 2>/dev/null | grep "attribute id = " | sed "s/.*= //"', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
+      ids = output.trim().split('\n').filter(Boolean);
+    } else if (keychainType === 'mac') {
+      // List all zcrystal credentials from keychain
+      const output = execSync('security dump-keychain -d 2>/dev/null | grep "zcrystal:" | sed "s/.*zcrystal://" | cut -d\" -f1"', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
+      ids = output.trim().split('\n').filter(Boolean);
+    }
+
+    const keys: CredentialKey[] = [];
+    for (const id of ids) {
+      const cred = loadCredentialFromKeychain(id);
+      if (cred) keys.push(cred);
+    }
+    return keys;
+  } catch {
+    return [];
   }
 }
 
 function saveKeysToStore(state: PoolState): void {
+  const keychainType = getOsKeychainType();
+
+  // Save each credential to OS keychain if available
+  if (keychainType !== 'none') {
+    let allStored = true;
+    for (const [id, cred] of state.keys) {
+      if (!storeCredentialToKeychain(id, cred)) {
+        allStored = false;
+      }
+    }
+    if (allStored && state.keys.size > 0) {
+      console.log(`[ZCrystal:CredentialPool] Saved ${state.keys.size} credentials to OS keychain (${keychainType})`);
+      // Also keep JSON as backup
+    }
+  }
+
+  // Always also save metadata-only to JSON file as backward-compatible fallback.
+  // Actual `key` values are ONLY ever stored in OS keychain.
   try {
     const { mkdirSync, writeFileSync } = require('node:fs') as typeof import('node:fs');
     const dir = `${process.env.HOME}/.openclaw/extensions/zcrystal/data`;
     mkdirSync(dir, { recursive: true });
     const path = `${dir}/credentials.json`;
-    const arr = [...state.keys.values()];
+    // Write metadata only — never persist actual API keys in JSON
+    const arr = [...state.keys.values()].map(({ key: _omitted, ...meta }) => meta);
     writeFileSync(path, JSON.stringify(arr, null, 2), 'utf-8');
   } catch (e) {
-    console.warn('[ZCrystal:CredentialPool] Failed to save credentials:', e);
+    console.warn('[ZCrystal:CredentialPool] Failed to save credentials to JSON fallback:', e);
+  }
+}
+
+function loadKeysFromStore(state: PoolState): void {
+  // Try OS keychain first
+  const keychainType = getOsKeychainType();
+  let loadedFromKeychain = false;
+
+  if (keychainType !== 'none') {
+    try {
+      const keys = loadAllCredentialsFromKeychain();
+      if (keys.length > 0) {
+        for (const k of keys) {
+          state.keys.set(k.id, k);
+        }
+        loadedFromKeychain = true;
+        console.log(`[ZCrystal:CredentialPool] Loaded ${state.keys.size} credentials from OS keychain (${keychainType})`);
+      }
+    } catch (e) {
+      console.warn('[ZCrystal:CredentialPool] Keychain load failed, falling back to JSON:', e);
+    }
+  }
+
+  // Fall back to JSON file if keychain had nothing or wasn't available
+  if (!loadedFromKeychain) {
+    try {
+      const { readFileSync, existsSync } = require('node:fs') as typeof import('node:fs');
+      const credPath = `${process.env.HOME}/.openclaw/extensions/zcrystal/data/credentials.json`;
+      if (existsSync(credPath)) {
+        const raw = readFileSync(credPath, 'utf-8');
+        const arr: CredentialKey[] = JSON.parse(raw);
+        for (const k of arr) {
+          // Re-populate `key` from OS keychain since JSON only has metadata now
+          if (!k.key && keychainType !== 'none') {
+            const fromKeychain = loadCredentialFromKeychain(k.id);
+            if (fromKeychain?.key) {
+              k.key = fromKeychain.key;
+            }
+          }
+          state.keys.set(k.id, k);
+        }
+        console.log('[ZCrystal:CredentialPool] Loaded', state.keys.size, 'credentials from JSON fallback');
+
+        // Migrate to keychain if keychain is available
+        if (keychainType !== 'none') {
+          console.log('[ZCrystal:CredentialPool] Migrating credentials to OS keychain...');
+          for (const [id, cred] of state.keys) {
+            if (cred.key) storeCredentialToKeychain(id, cred);
+          }
+        }
+      }
+    } catch {
+      // File may not exist yet, that's fine
+    }
   }
 }
 

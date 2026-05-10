@@ -467,6 +467,11 @@ export class SelfEvolutionEngine {
             }
             return result;
         }
+        catch (err) {
+            // H5 FIX: Ensure Set is cleaned up on ANY exception, not just finally
+            this.evolvingSkills.delete(skill.slug);
+            throw err;
+        }
         finally {
             this.evolvingSkills.delete(skill.slug);
         }

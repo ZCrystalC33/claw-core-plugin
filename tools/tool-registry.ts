@@ -56,6 +56,7 @@ print(json.dumps(tools))
 
 export interface ToolRegistryService {
   name: string;
+  id: string;
   onStart: () => Promise<void>;
   onStop: () => Promise<void>;
 }
@@ -66,6 +67,7 @@ export function createToolRegistryService(api: any): ToolRegistryService {
 
   return {
     name: 'claw-core-tool-registry',
+    id: 'claw-core-tool-registry',
 
     async onStart() {
       console.log('[Claw_Core] ToolRegistry: Starting discovery...');
