@@ -1,83 +1,85 @@
 # Claw_Core Plugin
 
-OpenClaw plugin for Claw_Core System integration.
+OpenClaw 插件 — Claw_Core 系統整合。
 
-## Features
+## 功能
 
-- **34+ Tool Files** — Full bridge to Python Core efficiency modules
-- **Event Hooks** — Context compressor, error classifier
-- **Tool Registry** — Centralized tool discovery and management
-- **Insights Engine** — Performance and quality metrics
-- **Credential Pool** — Secure API key management (OS Keychain)
-- **Circuit Breaker** — Fault tolerance patterns
-- **Self-Evolution** — Pattern detection and learning from feedback
-- **Decomposer** — Real Python bridge for task decomposition
+- **34+ Tool 模組** — 完整橋接 Python Core 效率模組
+- **事件鉤子** — 上下文壓縮、錯誤分類
+- **工具註冊表** — 集中式工具發現與管理
+- **洞察引擎** — 效能與品質指標
+- **認證池** — 安全 API 金鑰管理（OS Keychain）
+- **熔斷器** — 容錯模式
+- **自我進化** — 模式檢測與反饋學習
+- **任務分解器** — 真实 Python 橋接
 
-## Security
+## 安全性
 
-- ✅ SQL injection protection (stdin parameterization)
-- ✅ Command injection protection (spawn argv isolation)
-- ✅ Credential storage in OS Keychain (no plaintext)
-- ✅ Race condition protection (evolvingSkills Set cleanup)
+| 項目 | 狀態 |
+|------|------|
+| SQL 注入防護（stdin 參數化） | ✅ |
+| 命令注入防護（spawn argv 隔離） | ✅ |
+| API 金鑰 OS Keychain 儲存 | ✅ |
+| 競態條件防護（Set 雙重清理） | ✅ |
 
-## Installation
+## 安裝
 
 ```bash
 openclaw plugins add /path/to/claw-core-plugin
 openclaw gateway restart
 ```
 
-## Plugin Info
+## 插件資訊
 
-| Field | Value |
-|-------|-------|
-| Name | claw-core-plugin |
-| Version | 1.6.0 |
-| Entry | `./dist/register.js` |
-| Min Gateway | 2026.4.15 |
+| 欄位 | 數值 |
+|------|------|
+| 名稱 | claw-core-plugin |
+| 版本 | 1.6.0 |
+| 入口 | `./dist/register.js` |
+| 最低 Gateway | 2026.4.15 |
 | Plugin API | >=2026.4.12 |
 
-## Build
+## 建置
 
 ```bash
 npm install
 npm run build
 ```
 
-## Available Tools
+## 可用工具
 
-| Tool | Description |
-|------|-------------|
-| `clawcore_decompose` | Task decomposition via Python Core |
-| `zcrystal_decompose` | Alternative decompose router |
-| `zcrystal_route_task` | Route subtasks to agents |
-| `zcrystal_health` | System health check |
-| `zcrystal_search` | FTS5 conversation search |
-| `zcrystal_correction_add` | Add L3 correction |
-| `zcrystal_pattern_add` | Add successful pattern |
-| `decomposer_decompose` | Real Python bridge decomposer |
+| 工具 | 說明 |
+|------|------|
+| `clawcore_decompose` | 透過 Python Core 進行任務分解 |
+| `zcrystal_decompose` | 替代任務分解器 |
+| `zcrystal_route_task` | 將子任務路由到代理 |
+| `zcrystal_health` | 系統健康檢查 |
+| `zcrystal_search` | FTS5 對話搜尋 |
+| `zcrystal_correction_add` | 新增 L3 修正 |
+| `zcrystal_pattern_add` | 新增成功模式 |
+| `decomposer_decompose` | 真实 Python 橋接分解器 |
 
-## Architecture
+## 架構
 
 ```
 ┌──────────────────────────────────────────┐
 │         OpenClaw Gateway                 │
 ├──────────────────────────────────────────┤
 │  claw-core-plugin (TypeScript)           │
-│  ├── tools/ (21 tool modules)            │
-│  ├── intelligence/ (self-evolution)      │
-│  ├── services/ (credential pool)        │
-│  ├── hooks/ (context, error)            │
+│  ├── tools/ (21 tool 模組)              │
+│  ├── intelligence/ (自我進化)            │
+│  ├── services/ (認證池)                 │
+│  ├── hooks/ (上下文、錯誤)              │
 │  └── signals/                            │
 ├──────────────────────────────────────────┤
-│  Python Core (openclaw-efficiency-core)   │
+│  Python Core (openclaw-efficiency-core)  │
 │  ├── decomposer.py                       │
 │  ├── router.py                           │
 │  ├── evolution/                           │
-│  └── infrastructure/ (retry, cache...)   │
+│  └── infrastructure/ (重試、快取...)      │
 └──────────────────────────────────────────┘
 ```
 
 ---
 
-*Claw_Core System — AI Agent Infrastructure*
+*Claw_Core System — AI Agent 基礎設施*
