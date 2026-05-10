@@ -13,7 +13,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
             await state.router.memoryStoreData('L3', `correction:${timestamp}`, `${params.context} | ${params.reflection}`);
             return okResult('Correction stored in L3');
@@ -43,7 +42,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             await state.router.memoryStoreData('L1', `hot:${Date.now()}`, params.content);
             return okResult('Added to HOT memory (L1)');
         },
@@ -68,7 +66,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             await state.router.memoryStoreData('L3', `pattern:${params.pattern}`, params.description);
             return okResult('Pattern stored in L3');
         },
@@ -96,7 +93,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const sessionData = {
                 timestamp: new Date().toISOString(),
                 topic: params.topic, task: params.task,
@@ -162,7 +158,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const suggestions = state.reviewEngine.getUpgradeSuggestions();
             const patterns = await state.router.memoryLoad('L3', 'patterns:list');
             const result = {
@@ -181,7 +176,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
             await state.router.memoryStoreData('L2', `proactive:${timestamp}`, `${params.action} -> ${params.outcome}`);
             return okResult('Proactive action logged');
@@ -205,7 +199,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
             await state.router.memoryStoreData('L2', `action:${timestamp}`, `${params.action}: ${params.result}`);
             return okResult('Action logged to L2');
@@ -230,7 +223,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.telegramWebhook(params.payload);
             if (result.success)
                 return okResult(JSON.stringify(result.data, null, 2));
@@ -245,7 +237,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.signalWebhook(params.payload);
             if (result.success)
                 return okResult(JSON.stringify(result.data, null, 2));
@@ -260,7 +251,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.genericWebhook(params.payload);
             if (result.success)
                 return okResult(JSON.stringify(result.data, null, 2));
@@ -311,7 +301,6 @@ export function registerProactiveTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const suggestions = state.reviewEngine.getUpgradeSuggestions();
             return okResult(JSON.stringify({ suggestions: suggestions.slice(0, 3).map((s) => s.reason), confidence: 0.6 }, null, 2));
         },

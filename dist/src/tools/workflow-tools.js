@@ -18,7 +18,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const task = state.workflowEngine.createTask(params.userId, params.taskType, params.trigger, params.repr, params.input || {});
             return okResult('Workflow created: ' + task.id, { taskId: task.id });
         },
@@ -31,7 +30,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const task = state.workflowEngine.getTask(params.taskId);
             if (task)
                 return okResult(JSON.stringify(task, null, 2));
@@ -56,7 +54,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const success = state.workflowEngine.pauseTask(params.taskId);
             if (success)
                 return okResult('Workflow paused: ' + params.taskId);
@@ -71,7 +68,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const success = state.workflowEngine.resumeTask(params.taskId);
             if (success)
                 return okResult('Workflow resumed: ' + params.taskId);
@@ -86,7 +82,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const success = state.workflowEngine.cancelTask(params.taskId);
             if (success)
                 return okResult('Workflow cancelled: ' + params.taskId);
@@ -126,7 +121,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.skillAdapter.importSkill(params.skillSlug);
             if (result.ok)
                 return okResult('Imported: ' + params.skillSlug, { skillId: result.data?.slug });
@@ -141,7 +135,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.skillAdapter.exportSkill(params.skillId);
             if (result.ok)
                 return okResult('Exported: ' + params.skillId);
@@ -172,7 +165,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const replayCase = state.replayRunner.saveReplayCase(params.taskId, params.taskType, params.input, params.output);
             return okResult('Replay case saved', { caseId: replayCase.id });
         },
@@ -185,7 +177,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const replayCase = state.replayRunner.getCase(params.caseId);
             if (replayCase)
                 return okResult(JSON.stringify(replayCase, null, 2));
@@ -200,7 +191,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             let cases = [];
             if (params.taskType)
                 cases = state.replayRunner.getCasesForTaskType(params.taskType);
@@ -225,7 +215,6 @@ export function registerWorkflowTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = state.replayRunner.rollback(params.skillId);
             if (result.success)
                 return okResult('Rolled back to: ' + result.previousVersion);

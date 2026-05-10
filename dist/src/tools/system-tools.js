@@ -37,7 +37,6 @@ export function registerSystemTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             state.reviewEngine.onTaskCompleted(params.taskId, params.taskType, params.toolChain, params.success, params.durationMs, params.userId, params.error);
             return okResult('Recorded: ' + params.taskId);
         },
@@ -56,7 +55,6 @@ export function registerSystemTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             // FIX: Actually register the hook handler locally
             if (!customHooks.has(params.name)) {
                 customHooks.set(params.name, []);
@@ -83,7 +81,6 @@ export function registerSystemTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const ctx = params.context || {};
             // Dispatch to @zcrystal/evo hookRegistry first
             await state.hookRegistry.dispatch(params.name, ctx);
@@ -135,7 +132,6 @@ export function registerSystemTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             await state.evolutionCoordinator.evolveOne(params.skillId, '');
             return okResult('Evolution triggered for: ' + params.skillId);
         },

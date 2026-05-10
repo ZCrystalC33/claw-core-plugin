@@ -23,7 +23,7 @@ export function registerTaskTools(api: OpenClawPluginApi, state: PluginState) {
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const result = await state.router.createTask({
         task_type: params.task_type,
         trigger: params.trigger,
@@ -45,7 +45,7 @@ export function registerTaskTools(api: OpenClawPluginApi, state: PluginState) {
     parameters: Type.Object({ taskId: Type.String() }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const result = await state.router.getTask(params.taskId);
       if (result.success) return okResult('Task retrieved', result.data);
       return errResult(result.error ?? 'Task not found');
@@ -75,7 +75,7 @@ export function registerTaskTools(api: OpenClawPluginApi, state: PluginState) {
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const result = await state.router.memoryStoreData(params.layer, params.key, params.value, params.ttl);
       if (result.success) return okResult('Memory stored in ' + params.layer);
       return errResult(result.error ?? 'Memory store failed');
@@ -90,7 +90,7 @@ export function registerTaskTools(api: OpenClawPluginApi, state: PluginState) {
     parameters: Type.Object({ layer: Type.String(), key: Type.String() }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const result = await state.router.memoryLoad(params.layer, params.key);
       if (result.success) return okResult(String(result.data ?? 'Memory not found'));
       return errResult(result.error ?? 'Memory load failed');
@@ -105,7 +105,7 @@ export function registerTaskTools(api: OpenClawPluginApi, state: PluginState) {
     parameters: Type.Object({ query: Type.String() }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const result = await state.router.memorySearch(params.query);
       if (result?.success) return okResult(JSON.stringify(result.data, null, 2), { count: result.data?.length });
       return errResult('Memory search failed');
@@ -120,7 +120,7 @@ export function registerTaskTools(api: OpenClawPluginApi, state: PluginState) {
     parameters: Type.Object({ layer: Type.String(), key: Type.String() }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const result = await state.router.memoryDelete(params.layer, params.key);
       if (result?.success) return okResult('Memory deleted');
       return errResult('Memory delete failed');
@@ -148,7 +148,7 @@ export function registerTaskTools(api: OpenClawPluginApi, state: PluginState) {
     parameters: Type.Object({ taskType: Type.String(), constraints: Type.Optional(Type.Record(Type.String(), Type.Any())) }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const result = await state.router.pickModel(params.taskType, params.constraints);
       if (result.success) return okResult('Model selected', result.data);
       return errResult(result.error ?? 'Model pick failed');

@@ -20,7 +20,6 @@ export function registerTaskTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.createTask({
                 task_type: params.task_type,
                 trigger: params.trigger,
@@ -43,7 +42,6 @@ export function registerTaskTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.getTask(params.taskId);
             if (result.success)
                 return okResult('Task retrieved', result.data);
@@ -74,7 +72,6 @@ export function registerTaskTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.memoryStoreData(params.layer, params.key, params.value, params.ttl);
             if (result.success)
                 return okResult('Memory stored in ' + params.layer);
@@ -90,7 +87,6 @@ export function registerTaskTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.memoryLoad(params.layer, params.key);
             if (result.success)
                 return okResult(String(result.data ?? 'Memory not found'));
@@ -106,7 +102,6 @@ export function registerTaskTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.memorySearch(params.query);
             if (result?.success)
                 return okResult(JSON.stringify(result.data, null, 2), { count: result.data?.length });
@@ -122,7 +117,6 @@ export function registerTaskTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.memoryDelete(params.layer, params.key);
             if (result?.success)
                 return okResult('Memory deleted');
@@ -151,7 +145,6 @@ export function registerTaskTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.pickModel(params.taskType, params.constraints);
             if (result.success)
                 return okResult('Model selected', result.data);

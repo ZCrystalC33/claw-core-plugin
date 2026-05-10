@@ -69,7 +69,7 @@ print(json.dumps(templates))
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       try {
         const script = `
 import sys
@@ -152,7 +152,7 @@ print(json.dumps({'pipeline': '${params.pipelineName}', 'context': result}, defa
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       try {
         const statesJson = JSON.stringify(params.states).replace(/"/g, '\\"');
         const transJson = JSON.stringify(params.transitions).replace(/'/g, "\\'");
@@ -188,7 +188,7 @@ print(json.dumps({'name': '${params.name}', 'states': ${statesJson}, 'transition
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       try {
         const script = `
 import sys
@@ -222,7 +222,7 @@ except Exception as e:
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       try {
         const script = `
 import sys

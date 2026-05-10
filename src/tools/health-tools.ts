@@ -57,7 +57,7 @@ print(json.dumps(output))
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       try {
         const script = `
 import sys

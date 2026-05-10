@@ -69,7 +69,6 @@ export function registerDecomposeRouterTools(api) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             try {
                 const max = params.maxSubtasks ?? 10;
                 const script = `
@@ -120,7 +119,6 @@ print(json.dumps(result, default=str))
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             try {
                 const script = `
 import sys
@@ -198,7 +196,6 @@ print(json.dumps({'agent_count': len(agents), 'agents': agents}))
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             try {
                 const script = `
 import sys

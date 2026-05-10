@@ -57,7 +57,7 @@ print(json.dumps(summary, default=str))
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       try {
         const script = `
 import sys
@@ -92,7 +92,7 @@ print(json.dumps({'ok': True}))
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       try {
         const script = `
 import sys
@@ -125,7 +125,7 @@ print(json.dumps({'ok': True}))
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       try {
         const script = `
 import sys

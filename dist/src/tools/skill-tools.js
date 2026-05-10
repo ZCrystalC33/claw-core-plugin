@@ -26,7 +26,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const version = await state.skillVersioning.createVersion(params.skillId, params.content, { title: params.title, taskType: params.taskType, tags: params.tags || [], createdAt: Date.now(), updatedAt: Date.now(), wasAutomated: false });
             return okResult('Version created: ' + version.version, { versionId: version.id });
         },
@@ -39,7 +38,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const version = await state.skillVersioning.getVersion(params.skillId, params.version);
             if (version)
                 return okResult(JSON.stringify(version, null, 2));
@@ -54,7 +52,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const versions = await state.skillVersioning.listVersions(params.skillId);
             return okResult(JSON.stringify(versions, null, 2), { count: versions.length });
         },
@@ -67,7 +64,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const from = await state.skillVersioning.getVersion(params.skillId, params.fromVersion);
             const to = await state.skillVersioning.getVersion(params.skillId, params.toVersion);
             if (!from || !to)
@@ -94,7 +90,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const success = await state.skillVersioning.rollback(params.skillId, params.version);
             if (success)
                 return okResult('Rolled back to: ' + params.version);
@@ -110,7 +105,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const results = await state.skillIndexer.search({ query: params.query, topK: params.limit || 10 });
             return okResult(JSON.stringify(results, null, 2), { count: results.length });
         },
@@ -123,7 +117,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const skillResult = await state.skillManager.getSkill(params.skillId);
             if (!skillResult.ok || !skillResult.data)
                 return errResult('Skill not found: ' + params.skillId);
@@ -179,7 +172,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = state.skillValidator.validate(params.content);
             return okResult(JSON.stringify(result, null, 2), { valid: result.valid });
         },
@@ -192,7 +184,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const valid = state.skillValidator.validateSync(params.content);
             return okResult(valid ? 'Valid' : 'Invalid', { valid });
         },
@@ -206,7 +197,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = state.skillMerger.suggestMerges(params.skills);
             return okResult(JSON.stringify(result, null, 2), { count: result.length });
         },
@@ -220,7 +210,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.getSkillVersions(params.skillId);
             if (result.success)
                 return okResult(JSON.stringify(result.data, null, 2), { count: result.data?.versions?.length || 0 });
@@ -235,7 +224,6 @@ export function registerSkillTools(api, state) {
         async execute(_id, _params) {
             const params = _params;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = params;
             const result = await state.router.rollbackSkill(params.skillId, params.version);
             if (result.success)
                 return okResult('Rolled back to version: ' + params.version);

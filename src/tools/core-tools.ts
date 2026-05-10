@@ -72,7 +72,7 @@ export function registerCoreTools(api: OpenClawPluginApi, state: PluginState) {
     parameters: Type.Object({ query: Type.String(), limit: Type.Optional(Type.Number()) }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const limit = params.limit || 10;
       // H3 FIX: query passed as argv, not embedded in python string — prevents command injection
       try {
@@ -111,7 +111,7 @@ export function registerCoreTools(api: OpenClawPluginApi, state: PluginState) {
     parameters: Type.Object({ question: Type.String(), depth: Type.Optional(Type.String()) }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const result = await state.honcho.ask('user', params.question, params.depth || 'quick');
       if (result.ok && result.data) return okResult(result.data, { question: params.question });
       return errResult('Ask failed');
@@ -143,7 +143,7 @@ export function registerCoreTools(api: OpenClawPluginApi, state: PluginState) {
     parameters: Type.Object({ slug: Type.String() }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       // FIX: Use helper type guards instead of inline casting
       const skillResult = await state.skillManager.getSkill(params.slug);
       const skill = unwrapSkill(skillResult);
@@ -176,7 +176,7 @@ export function registerCoreTools(api: OpenClawPluginApi, state: PluginState) {
     parameters: Type.Object({ slug: Type.Optional(Type.String()), iterations: Type.Optional(Type.Number()) }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const result = await state.router.startEvolution(params.slug);
       if (result.success) return okResult('Evolution started', result.data);
       return errResult(result.error ?? 'Evolution failed');
@@ -194,7 +194,7 @@ export function registerCoreTools(api: OpenClawPluginApi, state: PluginState) {
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       try {
         if (!state?.traceStore) {
           state?.logger?.warning('[ZCrystal] traceStore not available');
@@ -238,7 +238,7 @@ export function registerCoreTools(api: OpenClawPluginApi, state: PluginState) {
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const limit = params.limit || 20;
       try {
         const { getMemoryIndex, formatMemoryIndexTable } = await import('../memory/progressive.js');
@@ -261,7 +261,7 @@ export function registerCoreTools(api: OpenClawPluginApi, state: PluginState) {
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       try {
         const { getMemoryEntryById } = await import('../memory/progressive.js');
         const content = await getMemoryEntryById(params.id);
@@ -286,7 +286,7 @@ export function registerCoreTools(api: OpenClawPluginApi, state: PluginState) {
     }),
     async execute(_id, _params) { const params = _params as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = params as any;
+       
       const limit = params.limit || 5;
       try {
         // First check if there's pending recall from auto-detection
