@@ -2,7 +2,7 @@
     "id": "claw-core",
     "name": "Claw_Core",
     "description": "Claw_Core System: decompose, route-task, benchmark, insights",
-    "version": "1.5.1",
+    "version": "1.6.0",
     "main": "register.js",
     "configSchema": {
         "type": "object",

@@ -430,7 +430,7 @@ export default definePluginEntry({
             clearInterval(proactiveInterval);
             zcState?.evolutionScheduler?.stop();
             console.log('[Claw_Core+ZCrystal] Cleanup complete on unload');
-        });
+        }, { name: 'claw-core:unload' });
         // =====================================================================
         // ZCrystal Tools (95+ tools from ZCrystal_evo ecosystem)
         // =====================================================================
