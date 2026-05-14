@@ -1,6 +1,6 @@
 {
   "name": "claw-core-plugin",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "Claw_Core System integration for OpenClaw",
   "main": "dist/register.js",
   "type": "module",
