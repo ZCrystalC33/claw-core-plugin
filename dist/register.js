@@ -54,7 +54,7 @@ function clearRecallContext() {
 // ZCrystal Evo Imports (via @zcrystal/evo symlink)
 // =====================================================================
 import { UnifiedApiRouter, createHonchoClient, createSkillManager, SelfEvolutionEngine, EvolutionCoordinator, EvolutionScheduler, ReviewEngine, ToolHub, SkillGenerator, SkillVersioning, SkillIndexer, SkillValidator, SkillMerger, CircuitBreaker, RateLimiter, StructuredLogger, Metrics, WorkflowEngine, OpenClawSkillAdapter, SkillSyncManager, ReplayRunner, HookRegistry, DiskStore, EvolutionStore, TraceStore, } from '@zcrystal/evo';
-import { registerBulkheadTools, registerCacheTools, registerContextEngineTools, registerCoreTools, registerCredentialPoolTools, registerBenchmarkTools, registerDecomposeRouterTools, registerDecomposerTools, registerErrorClassifierTools, registerEventsTools, registerFeaturesTools, registerHealthTools, registerLazyTools, registerLockTools, registerMetricsTools, registerMiddlewareTools, registerMonitorTools, registerPipelineTools, registerProactiveTools, registerQuotaTools, registerRateLimitTools, registerRegistryTools, registerRetryTools, registerSerializersTools, registerCircuitBreakerTools, registerCoordinatorTools, registerSkillSystemTools, registerSkillTools, registerSystemTools, registerTaskTools, registerTelemetryTools, registerWorkerpoolTools, registerWorkflowTools, } from './src/tools/index.js';
+import { registerBulkheadTools, registerCacheTools, registerContextEngineTools, registerCoreTools, registerCredentialPoolTools, registerBenchmarkTools, registerMemoryBankTools, registerDecomposeRouterTools, registerDecomposerTools, registerErrorClassifierTools, registerEventsTools, registerFeaturesTools, registerHealthTools, registerLazyTools, registerLockTools, registerMetricsTools, registerMiddlewareTools, registerMonitorTools, registerPipelineTools, registerProactiveTools, registerQuotaTools, registerRateLimitTools, registerRegistryTools, registerRetryTools, registerSerializersTools, registerCircuitBreakerTools, registerCoordinatorTools, registerSkillSystemTools, registerSkillTools, registerSystemTools, registerTaskTools, registerTelemetryTools, registerWorkerpoolTools, registerWorkflowTools, } from './src/tools/index.js';
 import { registerSignalTools } from './src/signals/tools.js';
 let zcState = null;
 function okResult(text, details) {
@@ -432,6 +432,42 @@ export default definePluginEntry({
             console.log('[Claw_Core+ZCrystal] Cleanup complete on unload');
         }, { name: 'claw-core:unload' });
         // =====================================================================
+        // Memory Bank: Agent Bootstrap Hook
+        // Inject dynamic memory context into agent bootstrap
+        // =====================================================================
+        api.registerHook('agent:bootstrap', async (event) => {
+            if (!zcState)
+                return;
+            const ctx = event;
+            const bootstrapFiles = ctx.bootstrapFiles || [];
+            // Check for memory bank index file (created by evolution cycle)
+            const MEMORY_BANK_INDEX = path.join(zcrystalConfig.paths.home, '.openclaw', 'extensions', 'zcrystal', 'data', 'memory-bank-index.md');
+            const { readFile, stat: fsStat } = await import('node:fs/promises');
+            const { existsSync } = await import('node:fs');
+            try {
+                if (existsSync(MEMORY_BANK_INDEX)) {
+                    const fileStat = await fsStat(MEMORY_BANK_INDEX);
+                    const content = await readFile(MEMORY_BANK_INDEX, 'utf-8');
+                    const age = Date.now() - fileStat.mtimeMs;
+                    // Only inject if fresh (within 1 hour)
+                    if (age < 3600000) {
+                        console.log('[Claw_Core:memory-bank] Injecting memory bank context into bootstrap');
+                        // Prepend memory bank context to SOUL.md or MEMORY.md
+                        // We add the path to bootstrapFiles so it gets injected
+                        const mbIdx = bootstrapFiles.findIndex(f => f.includes('MEMORY.md'));
+                        if (mbIdx !== -1) {
+                            // We signal that memory bank should be prepended to MEMORY.md
+                            // by storing context in L1 for the agent to pick up
+                            await zcState.router.memoryStoreData('L1', '_bootstrap_memory_bank', content);
+                        }
+                    }
+                }
+            }
+            catch (err) {
+                console.warn('[Claw_Core:memory-bank] Bootstrap inject failed:', err);
+            }
+        }, { name: 'claw-core:memory-bank-bootstrap' });
+        // =====================================================================
         // ZCrystal Tools (95+ tools from ZCrystal_evo ecosystem)
         // =====================================================================
         if (zcState) {
@@ -462,6 +498,7 @@ export default definePluginEntry({
             registerCacheTools(api);
             registerContextEngineTools(api);
             registerDecomposerTools(api);
+            registerMemoryBankTools(api);
             registerErrorClassifierTools(api);
             registerFeaturesTools(api);
             registerLazyTools(api);

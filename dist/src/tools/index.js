@@ -9,6 +9,7 @@ export { registerContextEngineTools } from './context-engine-tools.js';
 export { registerCoordinatorTools } from './coordinator-tools.js';
 export { registerCoreTools } from './core-tools.js';
 export { registerCredentialPoolTools } from './credential-pool-tools.js';
+export { registerMemoryBankTools } from './memory-bank-tools.js';
 export { registerDecomposerTools } from './decomposer-tools.js';
 export { registerDecomposeRouterTools } from './decompose-router.js';
 export { registerErrorClassifierTools } from './error-classifier-tools.js';
