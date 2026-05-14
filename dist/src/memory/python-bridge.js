@@ -52,7 +52,7 @@ export async function fuseKnowledge(entries, query) {
 import sys
 import json
 sys.path.insert(0, '${CORE_CWD}')
-from efficiency_core.memory import KnowledgeFusion, KnowledgeEntry, KnowledgeSource
+from efficiency_core.memory import KnowledgeFusion, KnowledgeEntry, KnowledgeSource, FusionConfig
 
 config = FusionConfig()
 fusion = KnowledgeFusion(config)
@@ -63,7 +63,7 @@ entries = [KnowledgeEntry(
     tags=tuple(e.get("tags", []))
 ) for e in ${JSON.stringify(entries)}]
 result = fusion.fuse(entries, query=${JSON.stringify(query ?? null)})
-print(json.dumps([{k: getattr(e, k) for k in ["id", "content", "source", "confidence"]} for e in result]))
+print(json.dumps([{'id': e.id, 'content': e.content, 'source': e.source.name if e.source else None, 'confidence': e.confidence} for e in result]))
 `;
     const raw = await runPythonWithStdin(script, {});
     return raw;
@@ -72,14 +72,17 @@ export async function zcrystalGetPatterns(skillSlug) {
     const script = `
 import sys
 import json
-sys.path.insert(0, '${CORE_CWD}')
-from efficiency_core.memory import ZCrystalInterface, EvolutionId
-
-zc = ZCrystalInterface()
 import asyncio
-asyncio.run(zc.load())
-patterns = asyncio.get_event_loop().run_until_complete(zc.get_patterns())
-filtered = [p for p in patterns if "${skillSlug || ''}" == '' or p.skillSlug == "${skillSlug || ''}"]
+sys.path.insert(0, '${CORE_CWD}')
+from efficiency_core.memory import ZCrystalInterface
+
+async def main():
+    zc = ZCrystalInterface()
+    await zc.load()
+    return await zc.get_patterns()
+
+patterns = asyncio.run(main())
+filtered = [p for p in patterns if "${skillSlug || ''}" == '' or p.skill_slug == "${skillSlug || ''}"]
 print(json.dumps([p.to_dict() for p in filtered]))
 `;
     const raw = await runPythonWithStdin(script, {}, 45000);
