@@ -54,7 +54,7 @@ print(json.dumps(serialize_health(health)))
 `;
         const raw = runPython(script);
         const data = JSON.parse(raw);
-        return okResult(JSON.stringify(data, null, 2), { checks: data.components.length });
+        return okResult(JSON.stringify(data, null, 2), { checks: (data as any).components.length });
       } catch (e: unknown) {
         return errResult(`Health check failed: ${e instanceof Error ? e.message : String(e)}`);
       }
