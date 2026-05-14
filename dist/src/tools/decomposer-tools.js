@@ -29,29 +29,29 @@ export function registerDecomposerTools(api) {
         description: 'Decompose task into subtasks using Python efficiency_core',
         parameters: Type.Object({
             task: Type.String(),
-            maxSubtasks: Type.Optional(Type.Number()),
         }),
         async execute(_id, params) {
             try {
-                const max = params.maxSubtasks ?? 10;
                 const script = [
                     'import sys, json',
                     'sys.path.insert(0, "/home/snow/.openclaw/workspace/openclaw-efficiency-core")',
                     'from efficiency_core import decompose',
+                    'from efficiency_core.decomposer import SubTask, TaskDecomposition',
                     'input_data = json.loads(sys.stdin.read())',
-                    'result = decompose(input_data["task"], max_subtasks=input_data.get("max_subtasks", 10))',
-                    'if hasattr(result, "__dict__"): result = vars(result)',
-                    'result = {k: v for k, v in result.items() if k not in ("tools", "registry")}',
-                    'print(json.dumps(result, default=str))'
+                    'result = decompose(input_data["task"])',
+                    'def subtask_to_dict(s):',
+                    '    return {"id": s.id, "task": s.task, "intent": s.intent, "assigned_to": s.assigned_to, "priority": s.priority.value if hasattr(s.priority, "value") else str(s.priority), "status": s.status.value if hasattr(s.status, "value") else str(s.status), "depends_on": s.depends_on, "result": s.result, "error": s.error}',
+                    'decomp = {"main_task": result.main_task, "raw_input": result.raw_input, "intent": result.intent, "entities": result.entities, "subtasks": [subtask_to_dict(s) for s in result.subtasks]}',
+                    'print(json.dumps(decomp))'
                 ].join('\n');
-                const raw = await runPythonWithStdin(script, { task: params.task, max_subtasks: max });
+                const raw = await runPythonWithStdin(script, { task: params.task });
                 const data = JSON.parse(raw);
-                const items = data.subtasks ?? data.steps ?? [];
+                const items = data.subtasks ?? [];
                 const lines = ['**Task:** ' + params.task, '', '**Subtasks:**'];
                 items.forEach((s, i) => {
-                    lines.push((i + 1) + '. ' + (s.title ?? s.description ?? JSON.stringify(s)));
-                    if (s.dependencies?.length)
-                        lines.push('   └─ ' + s.dependencies.join(', '));
+                    lines.push((i + 1) + '. 🎯 ' + s.task);
+                    if (s.depends_on?.length)
+                        lines.push('   └─ Dependencies: ' + s.depends_on.join(', '));
                 });
                 return okResult(lines.join('\n'), { task: params.task, count: items.length });
             }
