@@ -10,4 +10,3 @@ const handler = async (event) => {
     console.log(`[claw-core:message-preprocessed] Body length: ${bodyForAgent.length} chars`);
 };
 export default handler;
-//# sourceMappingURL=handler.js.map

@@ -8,4 +8,3 @@ const handler = async (event) => {
     console.log(`[claw-core:session-compact-before] Messages: ${messageCount}, Tokens: ~${tokenCount}`);
 };
 export default handler;
-//# sourceMappingURL=handler.js.map

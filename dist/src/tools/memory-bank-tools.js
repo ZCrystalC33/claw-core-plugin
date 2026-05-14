@@ -1,18 +1,7 @@
-/**
- * Memory Bank Tools - Unified TypeScript bridge to Python MemoryQueryInterface
- *
- * Integrates:
- * - MemoryQueryInterface (FTS5 + Wiki + Honcho + Docling + ZCrystal)
- * - KnowledgeFusion (deduplication + conflict resolution)
- * - ZCrystalInterface (evolution learning patterns)
- *
- * Progressive disclosure: index → read → fuse
- */
 import { Type } from '@sinclair/typebox';
 import { mqiSearch, memoryBankIndex, memoryBankRead, compressContextWithMQI } from '../memory/python-bridge.js';
 import { okResult, errResult } from '../index.js';
 export function registerMemoryBankTools(api) {
-    // ─── MQI Search ───────────────────────────────────────────────
     api.registerTool({
         name: 'zcrystal_mqi_search',
         label: '🔍 MQI Search',
@@ -51,7 +40,6 @@ export function registerMemoryBankTools(api) {
             }
         },
     });
-    // ─── Memory Bank Index (Layer 1) ──────────────────────────────
     api.registerTool({
         name: 'zcrystal_mqi_index',
         label: '📚 Memory Bank Index',
@@ -71,7 +59,6 @@ export function registerMemoryBankTools(api) {
             }
         },
     });
-    // ─── Memory Bank Read (Layer 3) ────────────────────────────────
     api.registerTool({
         name: 'zcrystal_mqi_read',
         label: '📖 Memory Bank Read',
@@ -89,7 +76,6 @@ export function registerMemoryBankTools(api) {
             }
         },
     });
-    // ─── Context Compress ─────────────────────────────────────────
     api.registerTool({
         name: 'zcrystal_context_compress',
         label: '🗜️ Context Compress',
@@ -117,4 +103,3 @@ export function registerMemoryBankTools(api) {
         },
     });
 }
-//# sourceMappingURL=memory-bank-tools.js.map

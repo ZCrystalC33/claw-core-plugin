@@ -1,45 +1,24 @@
-/**
- * Progressive Memory Disclosure
- * Based on Claude-Mem's 3-layer pattern: index → timeline → deep-dive
- *
- * Reduces context bloat by fetching metadata first, full content on demand.
- */
 import { spawn } from 'node:child_process';
-// okResult/errResult provided by parent plugin via module-level export
-// These are stubs since the actual functions are in register.ts
 const okResult = (text, details) => ({ content: [{ type: 'text', text }], details: details ?? {} });
 const errResult = (text) => ({ content: [{ type: 'text', text }], details: {}, isError: true });
-/**
- * Estimate token count from text (rough approximation)
- * Assumes ~4 chars per token for Chinese/English mixed
- */
 function estimateTokens(text) {
     return Math.ceil(text.length / 4);
 }
-/**
- * Format timestamp to readable date
- */
 function formatDate(ts) {
     try {
         const d = new Date(ts);
         return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
     }
     catch {
-        return ts.slice(5, 16); // Fallback: MM-DDTHH:MM
+        return ts.slice(5, 16);
     }
 }
-/**
- * Extract title from content (first line or first 50 chars)
- */
 function extractTitle(content, maxLen = 50) {
     const firstLine = content.split('\n')[0].trim();
     if (firstLine.length <= maxLen)
         return firstLine;
     return firstLine.slice(0, maxLen - 3) + '...';
 }
-/**
- * Classify content type from content patterns
- */
 function classifyType(content) {
     const lower = content.toLowerCase();
     if (lower.includes('fix:') || lower.includes('bug fix'))
@@ -56,9 +35,6 @@ function classifyType(content) {
         return 'error';
     return 'general';
 }
-/**
- * Layer 1: Get memory index (metadata only, ~50 tokens per entry)
- */
 export async function getMemoryIndex(query, limit = 20) {
     return new Promise((resolve, reject) => {
         const script = `
@@ -101,9 +77,6 @@ print(entries)
         py.on('error', reject);
     });
 }
-/**
- * Format memory index as markdown table (Token Cost Visibility)
- */
 export function formatMemoryIndexTable(entries) {
     if (entries.length === 0)
         return '_No matching memory entries_';
@@ -119,9 +92,6 @@ export function formatMemoryIndexTable(entries) {
     md += `\n💡 **Progressive disclosure:** Fetch full content with \`zcrystal_memory_get id=N\`\n`;
     return md;
 }
-/**
- * Layer 3: Get full observation by ID
- */
 export async function getMemoryEntryById(id) {
     return new Promise((resolve, reject) => {
         const script = `
@@ -149,4 +119,3 @@ print(row[0] if row else '')
         py.on('error', reject);
     });
 }
-//# sourceMappingURL=progressive.js.map

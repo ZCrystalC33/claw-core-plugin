@@ -1,4 +1,3 @@
-// STUB - Features tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerFeaturesTools(api) {
@@ -12,4 +11,3 @@ export function registerFeaturesTools(api) {
         },
     });
 }
-//# sourceMappingURL=features-tools.js.map

@@ -1,15 +1,7 @@
-/**
- * MCP Bridge Service for ZCrystal Plugin
- *
- * Bridges Claw_Core MCP Server tools to OpenClaw via stdio transport.
- * Uses @modelcontextprotocol/sdk for JSON-RPC framing.
- * Registered as an OpenClaw Plugin Service via `api.registerService()`.
- */
 import { Type } from '@sinclair/typebox';
 import { join } from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-// Module-level state
 let bridgeState = null;
 function makeDefaults(workspaceDir) {
     return {
@@ -26,19 +18,15 @@ function okResult(text, details) {
 function errResult(text) {
     return { content: [{ type: 'text', text }], details: {}, isError: true };
 }
-// =====================================================================
-// MCP Client Lifecycle
-// =====================================================================
 async function startMcpClient(state) {
     if (state.mcpClient) {
         try {
             await state.mcpClient.close();
         }
-        catch { /* ignore */ }
+        catch { }
         state.mcpClient = undefined;
     }
     console.log('[ZCrystal:McpBridge] Starting MCP server:', state.config.mcpServerPath);
-    // Use StdioClientTransport which spawns the process internally
     const transport = new StdioClientTransport({
         command: state.config.mcpServerPath,
         args: state.config.mcpServerArgs,
@@ -50,7 +38,6 @@ async function startMcpClient(state) {
     }, {
         capabilities: {},
     });
-    // Handle transport-level errors
     transport.onerror = (e) => {
         console.error('[ZCrystal:McpBridge] Transport error:', e);
         state.connected = false;
@@ -64,7 +51,6 @@ async function startMcpClient(state) {
         state.mcpClient = client;
         state.connected = true;
         state.retryCount = 0;
-        // Discover available tools
         try {
             const toolsResult = await client.listTools();
             const toolList = toolsResult.tools || [];
@@ -89,9 +75,6 @@ async function startMcpClient(state) {
         throw e;
     }
 }
-// =====================================================================
-// Service Definition
-// =====================================================================
 export function createMcpBridgeService(api) {
     return {
         id: 'zcrystal-mcp-bridge',
@@ -106,9 +89,7 @@ export function createMcpBridgeService(api) {
                 initialized: false,
                 workspaceDir,
             };
-            // Register management tools
             registerMcpBridgeTools(api, bridgeState);
-            // Try to connect to MCP server (non-blocking failure is OK)
             try {
                 await startMcpClient(bridgeState);
             }
@@ -116,7 +97,6 @@ export function createMcpBridgeService(api) {
                 console.warn('[ZCrystal:McpBridge] Initial connection failed (MCP server may not be installed):', e);
                 bridgeState.retryCount++;
             }
-            // Start health check
             bridgeState.healthCheckTimer = setInterval(async () => {
                 if (!bridgeState)
                     return;
@@ -133,7 +113,6 @@ export function createMcpBridgeService(api) {
                     }
                 }
                 else if (bridgeState.mcpClient && bridgeState.connected) {
-                    // Ping to verify connection
                     try {
                         await bridgeState.mcpClient.ping();
                     }
@@ -155,18 +134,14 @@ export function createMcpBridgeService(api) {
                 try {
                     await bridgeState.mcpClient.close();
                 }
-                catch { /* ignore */ }
+                catch { }
             }
             bridgeState = null;
             console.log('[ZCrystal:McpBridge] Service stopped.');
         },
     };
 }
-// =====================================================================
-// Tool Registration
-// =====================================================================
 function registerMcpBridgeTools(api, state) {
-    // --- zcrystal_mcp_status ---
     api.registerTool({
         name: 'zcrystal_mcp_status',
         label: 'ZCrystal MCP Bridge Status',
@@ -188,7 +163,6 @@ ${toolNames.length > 0 ? '- Tools: ' + toolNames.join(', ') : ''}`, {
             });
         },
     });
-    // --- zcrystal_mcp_tools_list ---
     api.registerTool({
         name: 'zcrystal_mcp_tools_list',
         label: 'ZCrystal MCP Tools List',
@@ -204,7 +178,6 @@ ${toolNames.length > 0 ? '- Tools: ' + toolNames.join(', ') : ''}`, {
             return okResult(lines.join('\n'), { count: tools.length });
         },
     });
-    // --- zcrystal_mcp_call ---
     api.registerTool({
         name: 'zcrystal_mcp_call',
         label: 'ZCrystal MCP Call',
@@ -235,7 +208,6 @@ ${toolNames.length > 0 ? '- Tools: ' + toolNames.join(', ') : ''}`, {
             }
         },
     });
-    // --- zcrystal_mcp_reconnect ---
     api.registerTool({
         name: 'zcrystal_mcp_reconnect',
         label: 'ZCrystal MCP Reconnect',
@@ -256,13 +228,9 @@ ${toolNames.length > 0 ? '- Tools: ' + toolNames.join(', ') : ''}`, {
         },
     });
 }
-// =====================================================================
-// Accessor for internal use
-// =====================================================================
 export function getMcpBridgeState() {
     return bridgeState;
 }
 export function getMcpTools() {
     return bridgeState?.tools ?? null;
 }
-//# sourceMappingURL=mcp-bridge.js.map

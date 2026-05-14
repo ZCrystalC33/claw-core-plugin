@@ -11,7 +11,6 @@ const handler = async (event) => {
     console.log(`[claw-core:message-transcribed] Duration/Path: ${mediaPath}`);
     console.log(`[claw-core:message-transcribed] Transcript length: ${transcript.length} chars`);
     if (transcript.length > 0) {
-        // Index transcript for search (via FTS5)
         if (globalThis.zcState) {
             try {
                 const { spawn } = await import('node:child_process');
@@ -34,4 +33,3 @@ const handler = async (event) => {
     }
 };
 export default handler;
-//# sourceMappingURL=handler.js.map

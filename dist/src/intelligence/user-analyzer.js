@@ -1,7 +1,3 @@
-/**
- * ZCrystal User Analyzer
- * Analyzes user communication patterns from stored traces
- */
 export class UserAnalyzer {
     traces = [];
     constructor(traces) {
@@ -66,4 +62,3 @@ export class UserAnalyzer {
             '這個分析會隨著您的使用而持續更新。';
     }
 }
-//# sourceMappingURL=user-analyzer.js.map

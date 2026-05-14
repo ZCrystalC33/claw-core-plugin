@@ -5,7 +5,6 @@ const handler = async (event) => {
     const bootstrapFiles = ctx.bootstrapFiles;
     const agentId = ctx.agentId ?? 'unknown';
     console.log(`[claw-core:agent-bootstrap] Agent "${agentId}" bootstrapping with ${bootstrapFiles?.length ?? 0} files`);
-    // Log which bootstrap files are being loaded (for debugging)
     if (bootstrapFiles && bootstrapFiles.length > 0) {
         const fileList = bootstrapFiles.map((f) => {
             const parts = f.replace(/\\/g, '/').split('/');
@@ -15,4 +14,3 @@ const handler = async (event) => {
     }
 };
 export default handler;
-//# sourceMappingURL=handler.js.map

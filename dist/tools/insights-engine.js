@@ -1,9 +1,3 @@
-/**
- * Claw_Core Insights Engine Service
- *
- * Collects usage data via Hooks and exposes query API via registerGatewayMethod.
- * Wraps the Python InsightsEngine for actual analysis.
- */
 import { execSync } from 'node:child_process';
 const INSIGHTS_DB = `${process.env.HOME}/.openclaw/claw-core-insights.db`;
 function queryInsightsPython(days = 7) {
@@ -81,7 +75,6 @@ except Exception as e:
         });
     }
     catch {
-        // Silently ignore persistence failures
     }
 }
 export function createInsightsService(api) {
@@ -90,9 +83,6 @@ export function createInsightsService(api) {
         id: 'claw-core-insights',
         async onStart() {
             console.log('[Claw_Core] Insights: Starting...');
-            // =====================================================================
-            // Register Gateway Method for querying insights
-            // =====================================================================
             api.registerGatewayMethod('claw_core.insights.query', async (ctx) => {
                 const days = ctx.params?.days ?? 7;
                 const result = queryInsightsPython(days);
@@ -111,10 +101,6 @@ export function createInsightsService(api) {
                     details: result,
                 };
             });
-            // =====================================================================
-            // Register Internal Hook to capture session updates
-            // =====================================================================
-            // Try multiple hook name variants for session updates
             const SESSION_HOOKS = [
                 'session:updated',
                 'sessionPatch',
@@ -134,14 +120,12 @@ export function createInsightsService(api) {
                             recordSessionUpdatePython(sessionId, messageCount, inputTokens, outputTokens, toolCalls, errors);
                         }
                         catch {
-                            // Never let hook failures propagate
                         }
                     });
                     console.log(`[Claw_Core] Insights: Registered hook "${hookName}"`);
                     break;
                 }
                 catch {
-                    // Hook not available, try next
                 }
             }
             console.log('[Claw_Core] Insights: Service started');
@@ -186,4 +170,3 @@ function formatInsightsReport(data) {
     }
     return lines.join('\n');
 }
-//# sourceMappingURL=insights-engine.js.map

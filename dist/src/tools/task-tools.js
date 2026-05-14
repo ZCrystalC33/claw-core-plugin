@@ -1,10 +1,6 @@
-/**
- * Task, Memory, and Router Tools
- */
 import { Type } from '@sinclair/typebox';
 import { okResult, errResult } from '../index.js';
 export function registerTaskTools(api, state) {
-    // zcrystal_task_create
     api.registerTool({
         name: 'zcrystal_task_create',
         label: 'ZCrystal Task Create',
@@ -19,7 +15,6 @@ export function registerTaskTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.createTask({
                 task_type: params.task_type,
                 trigger: params.trigger,
@@ -33,7 +28,6 @@ export function registerTaskTools(api, state) {
             return errResult(result.error ?? 'Task creation failed');
         },
     });
-    // zcrystal_task_get
     api.registerTool({
         name: 'zcrystal_task_get',
         label: 'ZCrystal Task Get',
@@ -41,14 +35,12 @@ export function registerTaskTools(api, state) {
         parameters: Type.Object({ taskId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.getTask(params.taskId);
             if (result.success)
                 return okResult('Task retrieved', result.data);
             return errResult(result.error ?? 'Task not found');
         },
     });
-    // zcrystal_task_stats
     api.registerTool({
         name: 'zcrystal_task_stats',
         label: 'ZCrystal Task Stats',
@@ -61,7 +53,6 @@ export function registerTaskTools(api, state) {
             return errResult(result.error ?? 'Failed to get task stats');
         },
     });
-    // zcrystal_memory_store
     api.registerTool({
         name: 'zcrystal_memory_store',
         label: 'ZCrystal Memory Store',
@@ -71,14 +62,12 @@ export function registerTaskTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.memoryStoreData(params.layer, params.key, params.value, params.ttl);
             if (result.success)
                 return okResult('Memory stored in ' + params.layer);
             return errResult(result.error ?? 'Memory store failed');
         },
     });
-    // zcrystal_memory_load
     api.registerTool({
         name: 'zcrystal_memory_load',
         label: 'ZCrystal Memory Load',
@@ -86,14 +75,12 @@ export function registerTaskTools(api, state) {
         parameters: Type.Object({ layer: Type.String(), key: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.memoryLoad(params.layer, params.key);
             if (result.success)
                 return okResult(String(result.data ?? 'Memory not found'));
             return errResult(result.error ?? 'Memory load failed');
         },
     });
-    // zcrystal_memory_search
     api.registerTool({
         name: 'zcrystal_memory_search',
         label: 'ZCrystal Memory Search',
@@ -101,14 +88,12 @@ export function registerTaskTools(api, state) {
         parameters: Type.Object({ query: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.memorySearch(params.query);
             if (result?.success)
                 return okResult(JSON.stringify(result.data, null, 2), { count: result.data?.length });
             return errResult('Memory search failed');
         },
     });
-    // zcrystal_memory_delete
     api.registerTool({
         name: 'zcrystal_memory_delete',
         label: 'ZCrystal Memory Delete',
@@ -116,14 +101,12 @@ export function registerTaskTools(api, state) {
         parameters: Type.Object({ layer: Type.String(), key: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.memoryDelete(params.layer, params.key);
             if (result?.success)
                 return okResult('Memory deleted');
             return errResult('Memory delete failed');
         },
     });
-    // zcrystal_memory_stats
     api.registerTool({
         name: 'zcrystal_memory_stats',
         label: 'ZCrystal Memory Stats',
@@ -136,7 +119,6 @@ export function registerTaskTools(api, state) {
             return errResult('Memory stats failed');
         },
     });
-    // zcrystal_model_pick
     api.registerTool({
         name: 'zcrystal_model_pick',
         label: 'ZCrystal Model Pick',
@@ -144,14 +126,12 @@ export function registerTaskTools(api, state) {
         parameters: Type.Object({ taskType: Type.String(), constraints: Type.Optional(Type.Record(Type.String(), Type.Any())) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.pickModel(params.taskType, params.constraints);
             if (result.success)
                 return okResult('Model selected', result.data);
             return errResult(result.error ?? 'Model pick failed');
         },
     });
-    // zcrystal_router_list
     api.registerTool({
         name: 'zcrystal_router_list',
         label: 'ZCrystal Router List',
@@ -164,7 +144,6 @@ export function registerTaskTools(api, state) {
             return errResult(result.error ?? 'Failed to list models');
         },
     });
-    // zcrystal_evo_ready
     api.registerTool({
         name: 'zcrystal_evo_ready',
         label: 'ZCrystal Evo Ready',
@@ -178,4 +157,3 @@ export function registerTaskTools(api, state) {
         },
     });
 }
-//# sourceMappingURL=task-tools.js.map

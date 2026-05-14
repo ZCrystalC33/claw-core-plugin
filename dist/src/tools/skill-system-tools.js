@@ -1,4 +1,3 @@
-// STUB - Skill system tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerSkillSystemTools(api) {
@@ -12,4 +11,3 @@ export function registerSkillSystemTools(api) {
         },
     });
 }
-//# sourceMappingURL=skill-system-tools.js.map

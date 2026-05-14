@@ -1,8 +1,3 @@
-/**
- * FeedbackStore - persistent storage for Why+How feedback entries.
- * Implements Memory Persistence Pattern 1 (dual storage: memory + disk).
- * Local memory always wins. FIFO eviction with max 200 entries.
- */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -14,12 +9,10 @@ export class FeedbackStore {
     loadPromise = null;
     constructor(dataDir) {
         this.dataDir = dataDir;
-        // Fire-and-forget async load - errors caught silently
         this.loadPromise = this.load().catch(err => {
             console.error('[FeedbackStore] Load failed:', err);
         });
     }
-    // Ensure load completes before any operation
     async ensureLoaded() {
         if (this.loadPromise) {
             await this.loadPromise;
@@ -27,12 +20,11 @@ export class FeedbackStore {
         }
     }
     add(entry) {
-        // Fire-and-forget: don't await ensureLoaded (performance)
         this.ensureLoaded().catch(() => { });
         const full = { ...entry, timestamp: Date.now() };
         this.entries.push(full);
         if (this.entries.length > this.MAX_ENTRIES) {
-            this.entries.shift(); // FIFO eviction
+            this.entries.shift();
         }
         this.persist().catch(err => {
             console.error('[FeedbackStore] Persist failed:', err);
@@ -83,4 +75,3 @@ export class FeedbackStore {
         }
     }
 }
-//# sourceMappingURL=feedback-store.js.map

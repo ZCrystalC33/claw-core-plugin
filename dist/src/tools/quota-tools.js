@@ -1,4 +1,3 @@
-// STUB - Quota tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerQuotaTools(api) {
@@ -14,4 +13,3 @@ export function registerQuotaTools(api) {
         },
     });
 }
-//# sourceMappingURL=quota-tools.js.map

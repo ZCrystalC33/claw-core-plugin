@@ -1,4 +1,3 @@
-// STUB - Circuit breaker tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerCircuitBreakerTools(api) {
@@ -25,4 +24,3 @@ export function registerCircuitBreakerTools(api) {
         },
     });
 }
-//# sourceMappingURL=circuit-breaker-tools.js.map

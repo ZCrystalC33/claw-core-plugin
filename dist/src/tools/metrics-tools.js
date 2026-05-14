@@ -1,6 +1,3 @@
-/**
- * Metrics Tools - Bridge to Python efficiency_core.metrics
- */
 import { Type } from '@sinclair/typebox';
 import { execSync } from 'node:child_process';
 import { okResult, errResult } from '../index.js';
@@ -13,7 +10,6 @@ function runPython(script) {
     }).trim();
 }
 export function registerMetricsTools(api) {
-    // ─── Metrics Summary ─────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_metrics',
         label: '📈 ClawCore Metrics',
@@ -39,7 +35,6 @@ print(json.dumps(summary, default=str))
             }
         },
     });
-    // ─── Record Decompose ────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_record_decompose',
         label: '📝 Record Decompose',
@@ -52,7 +47,6 @@ print(json.dumps(summary, default=str))
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const script = `
 import sys
@@ -75,7 +69,6 @@ print(json.dumps({'ok': True}))
             }
         },
     });
-    // ─── Record Integration ─────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_record_integration',
         label: '📝 Record Integration',
@@ -87,7 +80,6 @@ print(json.dumps({'ok': True}))
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const script = `
 import sys
@@ -109,7 +101,6 @@ print(json.dumps({'ok': True}))
             }
         },
     });
-    // ─── Timed Operation ─────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_timed',
         label: '⏱️ ClawCore Timed',
@@ -120,7 +111,6 @@ print(json.dumps({'ok': True}))
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const script = `
 import sys
@@ -144,7 +134,6 @@ print(json.dumps({'result': result, 'operation': '${params.operation}'}))
             }
         },
     });
-    // ─── Reset Metrics ───────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_metrics_reset',
         label: '🔄 Reset Metrics',
@@ -170,4 +159,3 @@ print(json.dumps({'ok': True}))
         },
     });
 }
-//# sourceMappingURL=metrics-tools.js.map

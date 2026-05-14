@@ -1,4 +1,3 @@
-// STUB - Queue tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerQueueTools(api) {
@@ -23,4 +22,3 @@ export function registerQueueTools(api) {
         },
     });
 }
-//# sourceMappingURL=queue-tools.js.map

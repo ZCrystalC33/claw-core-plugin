@@ -1,4 +1,3 @@
-// Decomposer tools - Real bridge to Python efficiency_core decomposer
 import { Type } from '@sinclair/typebox';
 import { spawn } from 'node:child_process';
 import { okResult, errResult } from '../index.js';
@@ -61,4 +60,3 @@ export function registerDecomposerTools(api) {
         },
     });
 }
-//# sourceMappingURL=decomposer-tools.js.map

@@ -1,33 +1,15 @@
-/**
- * Claw_Core + ZCrystal Plugin for OpenClaw
- *
- * Unified plugin combining:
- * - Claw_Core: 4 command skills + tool registry + insights engine
- * - ZCrystal: Honcho + Skills + Self-Evolution + TaskLifecycle + MemoryLayers + FTS5
- *
- * ZCrystal components integrated from ~/.openclaw/workspace/zcrystal-plugin/src/
- */
 import { definePluginEntry } from 'openclaw/plugin-sdk/plugin-entry';
 import { Type } from '@sinclair/typebox';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createToolRegistryService } from './tools/tool-registry.js';
 import { createInsightsService } from './tools/insights-engine.js';
-// =====================================================================
-// ZCrystal Imports (from copied src/ modules)
-// =====================================================================
-// Note: These are copied from zcrystal-plugin/src/ and adapted for integration
-// ZCrystal hooks
 import { compressContext, estimateTokens } from './src/hooks/context-compressor.js';
 import { classifyError } from './src/hooks/error-classifier.js';
-// ZCrystal services
 import { createCredentialPoolService } from './src/services/credential-pool.js';
 import { createMcpBridgeService } from './src/services/mcp-bridge.js';
-// ZCrystal utils
 import { stripPrivateTags } from './src/intelligence/utils/privacy-filter.js';
-// ZCrystal memory modules (for FTS5 integration)
 import { UNCERTAINTY_MARKERS } from './src/memory/recall.js';
-// ZCrystal config
 import { config as zcrystalConfig } from './src/config.js';
 let pendingRecallContext = null;
 const RECALL_CONTEXT_TTL_MS = 30_000;
@@ -50,9 +32,6 @@ function getRecallContext() {
 function clearRecallContext() {
     pendingRecallContext = null;
 }
-// =====================================================================
-// ZCrystal Evo Imports (via @zcrystal/evo symlink)
-// =====================================================================
 import { UnifiedApiRouter, createHonchoClient, createSkillManager, SelfEvolutionEngine, EvolutionCoordinator, EvolutionScheduler, ReviewEngine, ToolHub, SkillGenerator, SkillVersioning, SkillIndexer, SkillValidator, SkillMerger, CircuitBreaker, RateLimiter, StructuredLogger, Metrics, WorkflowEngine, OpenClawSkillAdapter, SkillSyncManager, ReplayRunner, HookRegistry, DiskStore, EvolutionStore, TraceStore, } from '@zcrystal/evo';
 import { registerBulkheadTools, registerCacheTools, registerContextEngineTools, registerCoreTools, registerCredentialPoolTools, registerBenchmarkTools, registerMemoryBankTools, registerDecomposeRouterTools, registerDecomposerTools, registerErrorClassifierTools, registerEventsTools, registerFeaturesTools, registerHealthTools, registerLazyTools, registerLockTools, registerMetricsTools, registerMiddlewareTools, registerMonitorTools, registerPipelineTools, registerProactiveTools, registerQuotaTools, registerRateLimitTools, registerRegistryTools, registerRetryTools, registerSerializersTools, registerCircuitBreakerTools, registerCoordinatorTools, registerSkillSystemTools, registerSkillTools, registerSystemTools, registerTaskTools, registerTelemetryTools, registerWorkerpoolTools, registerWorkflowTools, } from './src/tools/index.js';
 import { registerSignalTools } from './src/signals/tools.js';
@@ -63,11 +42,7 @@ function okResult(text, details) {
 function errResult(text) {
     return { content: [{ type: 'text', text }], details: {}, isError: true };
 }
-// Re-export for tool modules
 export { okResult, errResult };
-// ============================================================================
-// FTS5 MCP HTTP Client (from ZCrystal)
-// ============================================================================
 const FTS5_MCP_URL = zcrystalConfig.fts5.mcpUrl;
 async function fts5Search(query, limit = 20) {
     try {
@@ -121,9 +96,6 @@ async function fts5Stats() {
         return { success: false, error: String(e) };
     }
 }
-// =====================================================================
-// Claw_Core Skill Content
-// =====================================================================
 const SKILL_CONTENT = {
     decompose: `---
 name: Decompose
@@ -301,9 +273,6 @@ const skillManager = new SkillManager();
 function getSkillsDir() {
     return path.join(path.dirname(fileURLToPath(import.meta.url)), 'skills');
 }
-// ============================================================================
-// Plugin Entry Point
-// ============================================================================
 export default definePluginEntry({
     id: 'claw-core',
     name: 'Claw_Core + ZCrystal',
@@ -314,21 +283,12 @@ export default definePluginEntry({
         skillManager.discover(skillsDir).catch((err) => {
             console.warn('[Claw_Core+ZCrystal] Skill discovery failed:', err);
         });
-        // =====================================================================
-        // Phase 4: Register Claw_Core Services
-        // =====================================================================
         const toolRegistryService = createToolRegistryService(api);
         const insightsService = createInsightsService(api);
         api.registerService(toolRegistryService);
         api.registerService(insightsService);
-        // =====================================================================
-        // ZCrystal Services: Credential Pool + MCP Bridge
-        // =====================================================================
         api.registerService(createCredentialPoolService(api));
         api.registerService(createMcpBridgeService(api));
-        // =====================================================================
-        // ZCrystal State Initialization (from ZCrystal_evo)
-        // =====================================================================
         try {
             const router = new UnifiedApiRouter();
             const honcho = createHonchoClient({ baseUrl: 'http://localhost:8000', workspace: 'openclaw' });
@@ -370,7 +330,7 @@ export default definePluginEntry({
                         }
                     }
                 }
-                catch { /* ignore */ }
+                catch { }
                 return [];
             };
             const evolutionScheduler = new EvolutionScheduler(evolutionCoordinator, getSkills, 60 * 60 * 1000);
@@ -380,7 +340,6 @@ export default definePluginEntry({
                 skillValidator, skillMerger, circuitBreaker, rateLimiter, logger, metrics, workflowEngine,
                 skillAdapter, skillSyncManager, replayRunner, hookRegistry, traceStore
             };
-            // Start evolution scheduler
             try {
                 evolutionScheduler.start();
                 console.log('[Claw_Core+ZCrystal] Auto-evolution scheduler started (1 hour interval)');
@@ -393,9 +352,6 @@ export default definePluginEntry({
             console.warn('[Claw_Core+ZCrystal] ZCrystal_evo initialization failed (running in degraded mode):', err);
             zcState = null;
         }
-        // =====================================================================
-        // Heartbeat + Proactive intervals (stored for cleanup)
-        // =====================================================================
         const heartbeatInterval = setInterval(async () => {
             try {
                 if (zcState) {
@@ -424,23 +380,17 @@ export default definePluginEntry({
                 console.error('[Claw_Core+ZCrystal Proactive] Error:', e);
             }
         }, 10 * 60 * 1000);
-        // Cleanup on unload
         api.registerHook('unload', () => {
             clearInterval(heartbeatInterval);
             clearInterval(proactiveInterval);
             zcState?.evolutionScheduler?.stop();
             console.log('[Claw_Core+ZCrystal] Cleanup complete on unload');
         }, { name: 'claw-core:unload' });
-        // =====================================================================
-        // Memory Bank: Agent Bootstrap Hook
-        // Inject dynamic memory context into agent bootstrap
-        // =====================================================================
         api.registerHook('agent:bootstrap', async (event) => {
             if (!zcState)
                 return;
             const ctx = event;
             const bootstrapFiles = ctx.bootstrapFiles || [];
-            // Check for memory bank index file (created by evolution cycle)
             const MEMORY_BANK_INDEX = path.join(zcrystalConfig.paths.home, '.openclaw', 'extensions', 'zcrystal', 'data', 'memory-bank-index.md');
             const { readFile, stat: fsStat } = await import('node:fs/promises');
             const { existsSync } = await import('node:fs');
@@ -449,15 +399,10 @@ export default definePluginEntry({
                     const fileStat = await fsStat(MEMORY_BANK_INDEX);
                     const content = await readFile(MEMORY_BANK_INDEX, 'utf-8');
                     const age = Date.now() - fileStat.mtimeMs;
-                    // Only inject if fresh (within 1 hour)
                     if (age < 3600000) {
                         console.log('[Claw_Core:memory-bank] Injecting memory bank context into bootstrap');
-                        // Prepend memory bank context to SOUL.md or MEMORY.md
-                        // We add the path to bootstrapFiles so it gets injected
                         const mbIdx = bootstrapFiles.findIndex(f => f.includes('MEMORY.md'));
                         if (mbIdx !== -1) {
-                            // We signal that memory bank should be prepended to MEMORY.md
-                            // by storing context in L1 for the agent to pick up
                             await zcState.router.memoryStoreData('L1', '_bootstrap_memory_bank', content);
                         }
                     }
@@ -467,9 +412,6 @@ export default definePluginEntry({
                 console.warn('[Claw_Core:memory-bank] Bootstrap inject failed:', err);
             }
         }, { name: 'claw-core:memory-bank-bootstrap' });
-        // =====================================================================
-        // ZCrystal Tools (95+ tools from ZCrystal_evo ecosystem)
-        // =====================================================================
         if (zcState) {
             registerCoreTools(api, zcState);
             registerTaskTools(api, zcState);
@@ -507,9 +449,6 @@ export default definePluginEntry({
             registerSerializersTools(api);
             registerSignalTools(api, zcState);
         }
-        // =====================================================================
-        // FTS5 Tools
-        // =====================================================================
         api.registerTool({
             name: 'zcrystal_fts5_search',
             label: 'ZCrystal FTS5 Search',
@@ -535,11 +474,7 @@ export default definePluginEntry({
                 return errResult(result.error ?? 'FTS5 stats failed');
             },
         });
-        // =====================================================================
-        // ZCrystal Evo Integration Tools
-        // =====================================================================
         if (zcState) {
-            // ToolHub
             api.registerTool({
                 name: 'zcrystal_toolhub_call',
                 label: 'ZCrystal ToolHub Call',
@@ -588,7 +523,6 @@ export default definePluginEntry({
                     return okResult(JSON.stringify(logs, null, 2), { count: logs.length });
                 },
             });
-            // Skill Generator
             api.registerTool({
                 name: 'zcrystal_skill_generate',
                 label: 'ZCrystal Skill Generate',
@@ -622,7 +556,6 @@ export default definePluginEntry({
                     return okResult(JSON.stringify(stats, null, 2));
                 },
             });
-            // Circuit Breaker
             api.registerTool({
                 name: 'zcrystal_circuit_status',
                 label: 'ZCrystal Circuit Breaker Status',
@@ -661,7 +594,6 @@ export default definePluginEntry({
                     return okResult(canExecute ? 'Circuit allows execution' : 'Circuit breaker is OPEN - operation blocked');
                 },
             }, { optional: true });
-            // Rate Limiter
             api.registerTool({
                 name: 'zcrystal_rate_status',
                 label: 'ZCrystal Rate Limiter Status',
@@ -687,7 +619,6 @@ export default definePluginEntry({
                     return okResult(allowed ? 'Rate limit allows execution' : 'Rate limit exceeded - operation blocked');
                 },
             }, { optional: true });
-            // Structured Logger
             api.registerTool({
                 name: 'zcrystal_log',
                 label: 'ZCrystal Log',
@@ -710,7 +641,6 @@ export default definePluginEntry({
                     return okResult('Logged: ' + params.message);
                 },
             }, { optional: true });
-            // Metrics
             api.registerTool({
                 name: 'zcrystal_metrics_get',
                 label: 'ZCrystal Metrics Get',
@@ -751,7 +681,6 @@ export default definePluginEntry({
                     return okResult('Metric recorded: ' + params.type + '/' + params.name);
                 },
             }, { optional: true });
-            // Evolution Control
             api.registerTool({
                 name: 'zcrystal_evolution_control',
                 label: 'ZCrystal Evolution Control',
@@ -776,9 +705,6 @@ export default definePluginEntry({
                 },
             });
         }
-        // =====================================================================
-        // Claw_Core Management Tools
-        // =====================================================================
         api.registerTool({
             name: 'claw_core_skill_list',
             label: 'Claw_Core Skill List',
@@ -816,9 +742,6 @@ export default definePluginEntry({
                     `Services: tool-registry, insights-engine, credential-pool, mcp-bridge`);
             },
         });
-        // =====================================================================
-        // Claw_Core Commands
-        // =====================================================================
         api.registerCommand({
             name: 'decompose',
             description: 'Break a complex task into structured sub-tasks',
@@ -893,9 +816,6 @@ export default definePluginEntry({
                 };
             },
         });
-        // =====================================================================
-        // ZCrystal Commands
-        // =====================================================================
         api.registerCommand({
             name: 'zcrystal_compact',
             description: 'Compact conversation and trigger self-evolution',
@@ -937,10 +857,6 @@ export default definePluginEntry({
 - FTS5: ${fts5.success ? '✅ Available' : '❌ Unavailable'}` };
             },
         });
-        // =====================================================================
-        // ZCrystal Hooks
-        // =====================================================================
-        // FTS5 real-time indexer path
         const FTS5_REALTIME_INDEXER = path.join(zcrystalConfig.paths.home, '.openclaw', 'skills', 'fts5', 'realtime_index.py');
         api.registerHook('message:received', async (event) => {
             if (!zcState)
@@ -994,7 +910,6 @@ export default definePluginEntry({
                 }
             }
         }, { name: 'zcrystal:msg_sent' });
-        // Context Compressor Hook
         api.registerHook('message:preprocessed', async (event) => {
             if (!zcState)
                 return;
@@ -1014,7 +929,6 @@ export default definePluginEntry({
                 ctx.messages = compressed;
             }
         }, { name: 'zcrystal:context-compressor' });
-        // Error Classifier Hook
         api.registerHook('after_tool_call', async (event) => {
             if (!zcState)
                 return;
@@ -1036,7 +950,6 @@ export default definePluginEntry({
                 console.warn(logLine);
             errCtx._zcrystal_error_classification = classification;
         });
-        // Self-Doubt Recall - Part 1: llm_output captures uncertainty
         api.registerHook('llm_output', async (event) => {
             if (!zcState)
                 return;
@@ -1065,7 +978,6 @@ export default definePluginEntry({
                 break;
             }
         });
-        // Self-Doubt Recall - Part 2: before_prompt_build injects recall
         api.registerHook('before_prompt_build', async (event) => {
             if (!zcState)
                 return;
@@ -1110,4 +1022,3 @@ export default definePluginEntry({
         console.log('[Claw_Core+ZCrystal] Registered 4 claw-core commands + 95+ zcrystal tools + 4 services + hooks');
     },
 });
-//# sourceMappingURL=register.js.map

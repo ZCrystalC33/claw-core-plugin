@@ -1,4 +1,3 @@
-// Actual implementation (not a build stub)
 import { Type } from '@sinclair/typebox';
 import { execSync } from 'node:child_process';
 import { okResult } from '../index.js';
@@ -37,4 +36,3 @@ export function registerBenchmarkTools(api) {
         },
     });
 }
-//# sourceMappingURL=benchmark-tools.js.map

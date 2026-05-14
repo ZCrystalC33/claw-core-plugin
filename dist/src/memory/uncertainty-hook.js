@@ -1,22 +1,6 @@
-/**
- * Uncertainty Detection Hook
- * Monitors Agent responses for uncertainty markers and auto-triggers recall
- *
- * Implements "方案 C: 混合模式" - system prompt + post-response hook
- *
- * Flow:
- * 1. Agent responds with uncertainty ("我不記得", "不確定")
- * 2. This hook detects the uncertainty marker
- * 3. Auto-search FTS5 for relevant context
- * 4. Inject results back (via memory system or next prompt hint)
- */
 import { spawn } from 'node:child_process';
 import { UNCERTAINTY_MARKERS } from './recall.js';
-// How many characters to search around the uncertainty marker
 const CONTEXT_RANGE = 100;
-/**
- * Extract the uncertainty context from an Agent response
- */
 export function extractUncertaintyContext(response) {
     for (const marker of UNCERTAINTY_MARKERS) {
         const idx = response.indexOf(marker);
@@ -29,12 +13,7 @@ export function extractUncertaintyContext(response) {
     }
     return null;
 }
-/**
- * Perform auto-search for uncertain context
- * Returns search results or empty string
- */
 export async function autoSearchContext(context, limit = 3) {
-    // Extract key words from context (exclude markers themselves)
     const words = context.split(/[\s,，。!?]+/)
         .filter(w => w.length > 2)
         .filter(w => !UNCERTAINTY_MARKERS.some(m => m.includes(w)));
@@ -70,12 +49,8 @@ else:
         py.on('error', reject);
     });
 }
-/**
- * Format uncertainty detection result for logging/injection
- */
 export function formatUncertaintyNotice(results, marker) {
     if (!results)
         return '';
     return `\n[MEMORY RECALL] Detected uncertainty ("${marker}"). Auto-searched relevant context:\n${results}\n`;
 }
-//# sourceMappingURL=uncertainty-hook.js.map

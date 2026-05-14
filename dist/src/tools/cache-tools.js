@@ -1,4 +1,3 @@
-// STUB - Cache tools not yet implemented
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerCacheTools(api) {
@@ -27,4 +26,3 @@ export function registerCacheTools(api) {
         },
     });
 }
-//# sourceMappingURL=cache-tools.js.map

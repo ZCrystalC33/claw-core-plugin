@@ -1,4 +1,3 @@
-// STUB - Context engine tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerContextEngineTools(api) {
@@ -14,4 +13,3 @@ export function registerContextEngineTools(api) {
         },
     });
 }
-//# sourceMappingURL=context-engine-tools.js.map

@@ -1,13 +1,3 @@
-/**
- * Claw_Core Tool Registry Service
- *
- * Discovers tools from Claw_Core's Python tool_registry and registers
- * them as OpenClaw tools via api.registerTool().
- *
- * Tool prefix: "clawcore_" to avoid naming conflicts.
- *
- * Uses child_process to call Python, avoiding direct import.
- */
 import { execSync } from 'node:child_process';
 import { Type } from '@sinclair/typebox';
 const TOOL_PREFIX = 'clawcore_';
@@ -153,4 +143,3 @@ else:
         },
     };
 }
-//# sourceMappingURL=tool-registry.js.map

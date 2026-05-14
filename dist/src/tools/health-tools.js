@@ -1,6 +1,3 @@
-/**
- * Health Check Tools - Bridge to Python efficiency_core.health
- */
 import { Type } from '@sinclair/typebox';
 import { execSync } from 'node:child_process';
 import { okResult, errResult } from '../index.js';
@@ -13,7 +10,6 @@ function runPython(script) {
     }).trim();
 }
 export function registerHealthTools(api) {
-    // ─── System Health ───────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_health',
         label: '🔍 ClawCore Health',
@@ -42,7 +38,6 @@ print(json.dumps(output))
             }
         },
     });
-    // ─── Component Health ────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_health_component',
         label: '🔍 ClawCore Component Health',
@@ -52,7 +47,6 @@ print(json.dumps(output))
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const script = `
 import sys
@@ -81,7 +75,6 @@ print(json.dumps(result))
             }
         },
     });
-    // ─── Cache Health ────────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_health_cache',
         label: '💾 ClawCore Cache Health',
@@ -109,7 +102,6 @@ print(json.dumps(stats))
             }
         },
     });
-    // ─── Quick Status ────────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_status',
         label: '📊 ClawCore Status',
@@ -156,4 +148,3 @@ print(json.dumps({
         },
     });
 }
-//# sourceMappingURL=health-tools.js.map

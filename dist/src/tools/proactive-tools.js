@@ -1,10 +1,6 @@
-/**
- * Proactive, Self-Improving, Webhook Tools
- */
 import { Type } from '@sinclair/typebox';
 import { okResult, errResult } from '../index.js';
 export function registerProactiveTools(api, state) {
-    // Self-Improving Tools
     api.registerTool({
         name: 'zcrystal_correction_add',
         label: 'ZCrystal Correction Add',
@@ -12,7 +8,6 @@ export function registerProactiveTools(api, state) {
         parameters: Type.Object({ context: Type.String(), reflection: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
             await state.router.memoryStoreData('L3', `correction:${timestamp}`, `${params.context} | ${params.reflection}`);
             return okResult('Correction stored in L3');
@@ -41,7 +36,6 @@ export function registerProactiveTools(api, state) {
         parameters: Type.Object({ content: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await state.router.memoryStoreData('L1', `hot:${Date.now()}`, params.content);
             return okResult('Added to HOT memory (L1)');
         },
@@ -65,7 +59,6 @@ export function registerProactiveTools(api, state) {
         parameters: Type.Object({ pattern: Type.String(), description: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await state.router.memoryStoreData('L3', `pattern:${params.pattern}`, params.description);
             return okResult('Pattern stored in L3');
         },
@@ -80,7 +73,6 @@ export function registerProactiveTools(api, state) {
             return okResult(result.success ? String(result.data) : 'No patterns yet');
         },
     });
-    // Proactive Session Tracker
     api.registerTool({
         name: 'zcrystal_session_set',
         label: 'ZCrystal Session Set',
@@ -92,7 +84,6 @@ export function registerProactiveTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const sessionData = {
                 timestamp: new Date().toISOString(),
                 topic: params.topic, task: params.task,
@@ -141,7 +132,7 @@ export function registerProactiveTools(api, state) {
                     if (session.nextMove)
                         message += `Next move: ${session.nextMove}. `;
                 }
-                catch { /* ignore */ }
+                catch { }
             }
             if (suggestions.length > 0)
                 message += `${suggestions.length} skill upgrade suggestions available.`;
@@ -157,7 +148,6 @@ export function registerProactiveTools(api, state) {
         parameters: Type.Object({ context: Type.Optional(Type.String()) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const suggestions = state.reviewEngine.getUpgradeSuggestions();
             const patterns = await state.router.memoryLoad('L3', 'patterns:list');
             const result = {
@@ -175,7 +165,6 @@ export function registerProactiveTools(api, state) {
         parameters: Type.Object({ action: Type.String(), outcome: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
             await state.router.memoryStoreData('L2', `proactive:${timestamp}`, `${params.action} -> ${params.outcome}`);
             return okResult('Proactive action logged');
@@ -198,7 +187,6 @@ export function registerProactiveTools(api, state) {
         parameters: Type.Object({ action: Type.String(), result: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
             await state.router.memoryStoreData('L2', `action:${timestamp}`, `${params.action}: ${params.result}`);
             return okResult('Action logged to L2');
@@ -214,7 +202,6 @@ export function registerProactiveTools(api, state) {
             return okResult(result.success ? String(result.data) : 'No recent actions');
         },
     });
-    // Webhook Tools
     api.registerTool({
         name: 'zcrystal_webhook_telegram',
         label: 'ZCrystal Webhook Telegram',
@@ -222,7 +209,6 @@ export function registerProactiveTools(api, state) {
         parameters: Type.Object({ payload: Type.Record(Type.String(), Type.Any()) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.telegramWebhook(params.payload);
             if (result.success)
                 return okResult(JSON.stringify(result.data, null, 2));
@@ -236,7 +222,6 @@ export function registerProactiveTools(api, state) {
         parameters: Type.Object({ payload: Type.Record(Type.String(), Type.Any()) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.signalWebhook(params.payload);
             if (result.success)
                 return okResult(JSON.stringify(result.data, null, 2));
@@ -250,14 +235,12 @@ export function registerProactiveTools(api, state) {
         parameters: Type.Object({ payload: Type.Record(Type.String(), Type.Any()) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.genericWebhook(params.payload);
             if (result.success)
                 return okResult(JSON.stringify(result.data, null, 2));
             return errResult(result.error ?? 'Generic webhook failed');
         },
     });
-    // Heartbeat
     api.registerTool({
         name: 'zcrystal_heartbeat_run',
         label: 'ZCrystal Heartbeat Run',
@@ -300,7 +283,6 @@ export function registerProactiveTools(api, state) {
         parameters: Type.Object({ context: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const suggestions = state.reviewEngine.getUpgradeSuggestions();
             return okResult(JSON.stringify({ suggestions: suggestions.slice(0, 3).map((s) => s.reason), confidence: 0.6 }, null, 2));
         },
@@ -319,4 +301,3 @@ export function registerProactiveTools(api, state) {
         },
     });
 }
-//# sourceMappingURL=proactive-tools.js.map

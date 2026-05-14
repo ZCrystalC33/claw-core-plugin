@@ -1,15 +1,5 @@
-/**
- * Credential Pool Service for ZCrystal Plugin
- *
- * Manages API key lifecycle with rotation, circuit-breaking, and usage tracking.
- * Registered as an OpenClaw Plugin Service via `api.registerService()`.
- */
 import { Type } from '@sinclair/typebox';
-// Module-level state (survives across service calls within same plugin lifecycle)
 let poolState = null;
-// =====================================================================
-// Helpers
-// =====================================================================
 function makeResult(text, details) {
     return { content: [{ type: 'text', text }], details: details ?? {} };
 }
@@ -58,12 +48,10 @@ function storeCredentialToKeychain(id, credential) {
     const json = JSON.stringify(credential);
     try {
         if (keychainType === 'linux') {
-            // Use secret-tool (GNOME Keyring / libsecret)
             execSync(`secret-tool store --label="zcrystal/credentials/${id}" id "${id}" <<< "${json.replace(/"/g, '\\"')}"`, { stdio: 'ignore' });
             return true;
         }
         else if (keychainType === 'mac') {
-            // Use macOS Keychain
             execSync(`security add-generic-password -a "zcrystal:${id}" -s "zcrystal-credentials" -w "${json.replace(/"/g, '\\"')}" -T ""`, { stdio: 'ignore' });
             return true;
         }
@@ -94,7 +82,6 @@ function loadCredentialFromKeychain(id) {
         }
     }
     catch {
-        // Key not found or keychain unavailable
     }
     return null;
 }
@@ -106,12 +93,10 @@ function loadAllCredentialsFromKeychain() {
     try {
         let ids = [];
         if (keychainType === 'linux') {
-            // Search for all zcrystal credentials
             const output = execSync('secret-tool search --all id "" 2>/dev/null | grep "attribute id = " | sed "s/.*= //"', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
             ids = output.trim().split('\n').filter(Boolean);
         }
         else if (keychainType === 'mac') {
-            // List all zcrystal credentials from keychain
             const output = execSync('security dump-keychain -d 2>/dev/null | grep "zcrystal:" | sed "s/.*zcrystal://" | cut -d\" -f1"', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
             ids = output.trim().split('\n').filter(Boolean);
         }
@@ -129,7 +114,6 @@ function loadAllCredentialsFromKeychain() {
 }
 function saveKeysToStore(state) {
     const keychainType = getOsKeychainType();
-    // Save each credential to OS keychain if available
     if (keychainType !== 'none') {
         let allStored = true;
         for (const [id, cred] of state.keys) {
@@ -139,17 +123,13 @@ function saveKeysToStore(state) {
         }
         if (allStored && state.keys.size > 0) {
             console.log(`[ZCrystal:CredentialPool] Saved ${state.keys.size} credentials to OS keychain (${keychainType})`);
-            // Also keep JSON as backup
         }
     }
-    // Always also save metadata-only to JSON file as backward-compatible fallback.
-    // Actual `key` values are ONLY ever stored in OS keychain.
     try {
         const { mkdirSync, writeFileSync } = require('node:fs');
         const dir = `${process.env.HOME}/.openclaw/extensions/zcrystal/data`;
         mkdirSync(dir, { recursive: true });
         const path = `${dir}/credentials.json`;
-        // Write metadata only — never persist actual API keys in JSON
         const arr = [...state.keys.values()].map(({ key: _omitted, ...meta }) => meta);
         writeFileSync(path, JSON.stringify(arr, null, 2), 'utf-8');
     }
@@ -158,7 +138,6 @@ function saveKeysToStore(state) {
     }
 }
 function loadKeysFromStore(state) {
-    // Try OS keychain first
     const keychainType = getOsKeychainType();
     let loadedFromKeychain = false;
     if (keychainType !== 'none') {
@@ -176,7 +155,6 @@ function loadKeysFromStore(state) {
             console.warn('[ZCrystal:CredentialPool] Keychain load failed, falling back to JSON:', e);
         }
     }
-    // Fall back to JSON file if keychain had nothing or wasn't available
     if (!loadedFromKeychain) {
         try {
             const { readFileSync, existsSync } = require('node:fs');
@@ -185,7 +163,6 @@ function loadKeysFromStore(state) {
                 const raw = readFileSync(credPath, 'utf-8');
                 const arr = JSON.parse(raw);
                 for (const k of arr) {
-                    // Re-populate `key` from OS keychain since JSON only has metadata now
                     if (!k.key && keychainType !== 'none') {
                         const fromKeychain = loadCredentialFromKeychain(k.id);
                         if (fromKeychain?.key) {
@@ -195,7 +172,6 @@ function loadKeysFromStore(state) {
                     state.keys.set(k.id, k);
                 }
                 console.log('[ZCrystal:CredentialPool] Loaded', state.keys.size, 'credentials from JSON fallback');
-                // Migrate to keychain if keychain is available
                 if (keychainType !== 'none') {
                     console.log('[ZCrystal:CredentialPool] Migrating credentials to OS keychain...');
                     for (const [id, cred] of state.keys) {
@@ -206,7 +182,6 @@ function loadKeysFromStore(state) {
             }
         }
         catch {
-            // File may not exist yet, that's fine
         }
     }
 }
@@ -214,7 +189,6 @@ function getActiveKeyByProvider(state, provider) {
     const candidates = [...state.keys.values()].filter(k => k.provider === provider && k.isActive && !k.isRotating);
     if (candidates.length === 0)
         return undefined;
-    // Pick key with lowest use count (load-balance)
     candidates.sort((a, b) => a.useCount - b.useCount);
     return candidates[0];
 }
@@ -230,7 +204,6 @@ function checkCircuitHealth(key, config) {
         const now = Date.now();
         const windowStart = now - config.resetWindowMs;
         if (key.lastFailureAt === undefined || key.lastFailureAt < windowStart) {
-            // Reset circuit: failure window expired
             key.consecutiveFailures = 0;
             key.failureCount = 0;
         }
@@ -238,20 +211,15 @@ function checkCircuitHealth(key, config) {
 }
 function recordUsage(state, keyId, record) {
     state.usageLog.push(record);
-    // Keep log bounded (last 10k records)
     if (state.usageLog.length > 10000) {
         state.usageLog = state.usageLog.slice(-5000);
     }
-    // Update key stats
     const key = state.keys.get(keyId);
     if (key) {
         key.useCount++;
         key.lastUsedAt = record.timestamp;
     }
 }
-// =====================================================================
-// Service Definition
-// =====================================================================
 export function createCredentialPoolService(api) {
     return {
         id: 'zcrystal-credential-pool',
@@ -263,11 +231,8 @@ export function createCredentialPoolService(api) {
                 config: getDefaults(),
                 initialized: false,
             };
-            // Load persisted keys
             loadKeysFromStore(poolState);
-            // Register management tools
             registerCredentialTools(api, poolState);
-            // Start health check timer
             poolState.healthCheckTimer = setInterval(() => {
                 if (!poolState)
                     return;
@@ -291,11 +256,7 @@ export function createCredentialPoolService(api) {
         },
     };
 }
-// =====================================================================
-// Tool Registration
-// =====================================================================
 function registerCredentialTools(api, state) {
-    // --- claw_core_credential_list ---
     api.registerTool({
         name: 'zcrystal_credential_list',
         label: 'ZCrystal Credential List',
@@ -318,7 +279,6 @@ function registerCredentialTools(api, state) {
             return makeResult(lines.length > 0 ? lines.join('\n') : 'No credentials registered.', { count: keys.length });
         },
     });
-    // --- claw_core_credential_add ---
     api.registerTool({
         name: 'zcrystal_credential_add',
         label: 'ZCrystal Credential Add',
@@ -353,7 +313,6 @@ function registerCredentialTools(api, state) {
             return makeResult(`Added credential "${params.name}" (${params.provider}) with id=${params.id}`);
         },
     });
-    // --- claw_core_credential_remove ---
     api.registerTool({
         name: 'zcrystal_credential_remove',
         label: 'ZCrystal Credential Remove',
@@ -371,7 +330,6 @@ function registerCredentialTools(api, state) {
             return makeResult(`Removed credential "${key.name}"`);
         },
     });
-    // --- claw_core_credential_rotate ---
     api.registerTool({
         name: 'zcrystal_credential_rotate',
         label: 'ZCrystal Credential Rotate',
@@ -389,7 +347,6 @@ function registerCredentialTools(api, state) {
             return makeResult(`Credential "${key.name}" marked for rotation on next use`);
         },
     });
-    // --- claw_core_credential_use ---
     api.registerTool({
         name: 'zcrystal_credential_use',
         label: 'ZCrystal Credential Use',
@@ -434,7 +391,6 @@ function registerCredentialTools(api, state) {
             return makeResult(JSON.stringify({ keyId: key.id, keyName: key.name, key: key.key }), { keyId: key.id });
         },
     });
-    // --- claw_core_credential_status ---
     api.registerTool({
         name: 'zcrystal_credential_status',
         label: 'ZCrystal Credential Status',
@@ -455,7 +411,6 @@ function registerCredentialTools(api, state) {
             return makeResult(JSON.stringify(stats, null, 2), stats);
         },
     });
-    // --- claw_core_credential_reset_circuit ---
     api.registerTool({
         name: 'zcrystal_credential_reset_circuit',
         label: 'ZCrystal Credential Reset Circuit',
@@ -476,9 +431,6 @@ function registerCredentialTools(api, state) {
         },
     });
 }
-// =====================================================================
-// Accessor for internal use (tools, hooks, etc.)
-// =====================================================================
 export function getCredentialPoolState() {
     return poolState;
 }
@@ -487,4 +439,3 @@ export function getCredentialKey(provider) {
         return undefined;
     return getActiveKeyByProvider(poolState, provider);
 }
-//# sourceMappingURL=credential-pool.js.map

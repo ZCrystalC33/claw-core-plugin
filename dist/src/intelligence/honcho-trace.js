@@ -1,7 +1,3 @@
-/**
- * Honcho Trace Persistence
- * Stores traces in Honcho session for persistent storage
- */
 const TRACE_SESSION = 'zcrystal-traces';
 export class HonchoTraceStore {
     honcho;
@@ -18,7 +14,6 @@ export class HonchoTraceStore {
             timestamp: Date.now()
         });
         try {
-            // Use Honcho chat API to store trace as a message
             await this.honcho.addMessages(TRACE_SESSION, [{ content: traceData, peerId: 'system' }]);
             console.log(`[HonchoTrace] Recorded: ${skill}/${action}`);
         }
@@ -56,4 +51,3 @@ export class HonchoTraceStore {
         }
     }
 }
-//# sourceMappingURL=honcho-trace.js.map

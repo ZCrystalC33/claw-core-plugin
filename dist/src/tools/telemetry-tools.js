@@ -1,4 +1,3 @@
-// STUB - Telemetry tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerTelemetryTools(api) {
@@ -15,4 +14,3 @@ export function registerTelemetryTools(api) {
         },
     });
 }
-//# sourceMappingURL=telemetry-tools.js.map

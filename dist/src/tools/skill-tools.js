@@ -1,6 +1,3 @@
-/**
- * Skill, Version, Index, Validator, Merger Tools
- */
 import { Type } from '@sinclair/typebox';
 import { okResult, errResult } from '../index.js';
 function isResult(val) {
@@ -14,7 +11,6 @@ function unwrapSkills(val) {
     return [];
 }
 export function registerSkillTools(api, state) {
-    // SkillVersioning Tools
     api.registerTool({
         name: 'zcrystal_version_create',
         label: 'ZCrystal Version Create',
@@ -25,7 +21,6 @@ export function registerSkillTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const version = await state.skillVersioning.createVersion(params.skillId, params.content, { title: params.title, taskType: params.taskType, tags: params.tags || [], createdAt: Date.now(), updatedAt: Date.now(), wasAutomated: false });
             return okResult('Version created: ' + version.version, { versionId: version.id });
         },
@@ -37,7 +32,6 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ skillId: Type.String(), version: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const version = await state.skillVersioning.getVersion(params.skillId, params.version);
             if (version)
                 return okResult(JSON.stringify(version, null, 2));
@@ -51,7 +45,6 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ skillId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const versions = await state.skillVersioning.listVersions(params.skillId);
             return okResult(JSON.stringify(versions, null, 2), { count: versions.length });
         },
@@ -63,7 +56,6 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ skillId: Type.String(), fromVersion: Type.String(), toVersion: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const from = await state.skillVersioning.getVersion(params.skillId, params.fromVersion);
             const to = await state.skillVersioning.getVersion(params.skillId, params.toVersion);
             if (!from || !to)
@@ -89,14 +81,12 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ skillId: Type.String(), version: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const success = await state.skillVersioning.rollback(params.skillId, params.version);
             if (success)
                 return okResult('Rolled back to: ' + params.version);
             return errResult('Rollback failed');
         },
     });
-    // SkillIndexer Tools
     api.registerTool({
         name: 'zcrystal_indexer_search',
         label: 'ZCrystal Indexer Search',
@@ -104,7 +94,6 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ query: Type.String(), limit: Type.Optional(Type.Number()) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const results = await state.skillIndexer.search({ query: params.query, topK: params.limit || 10 });
             return okResult(JSON.stringify(results, null, 2), { count: results.length });
         },
@@ -116,7 +105,6 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ skillId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const skillResult = await state.skillManager.getSkill(params.skillId);
             if (!skillResult.ok || !skillResult.data)
                 return errResult('Skill not found: ' + params.skillId);
@@ -131,7 +119,6 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({}),
         async execute(_id, _params) {
             try {
-                // Discover all skills first (handle both Result and array returns)
                 const discoverResult = await state.skillManager.discover();
                 const skills = unwrapSkills(discoverResult);
                 let indexed = 0;
@@ -163,7 +150,6 @@ export function registerSkillTools(api, state) {
             return okResult(JSON.stringify(stats, null, 2));
         },
     });
-    // SkillValidator Tools
     api.registerTool({
         name: 'zcrystal_validator_validate',
         label: 'ZCrystal Validator Validate',
@@ -171,7 +157,6 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ content: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = state.skillValidator.validate(params.content);
             return okResult(JSON.stringify(result, null, 2), { valid: result.valid });
         },
@@ -183,12 +168,10 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ content: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const valid = state.skillValidator.validateSync(params.content);
             return okResult(valid ? 'Valid' : 'Invalid', { valid });
         },
     });
-    // SkillMerger Tools
     api.registerTool({
         name: 'zcrystal_merger_suggest',
         label: 'ZCrystal Merger Suggest',
@@ -196,12 +179,10 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ skills: Type.Array(Type.String()) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = state.skillMerger.suggestMerges(params.skills);
             return okResult(JSON.stringify(result, null, 2), { count: result.length });
         },
     });
-    // SkillVersions
     api.registerTool({
         name: 'zcrystal_skill_versions',
         label: 'ZCrystal Skill Versions',
@@ -209,7 +190,6 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ skillId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.getSkillVersions(params.skillId);
             if (result.success)
                 return okResult(JSON.stringify(result.data, null, 2), { count: result.data?.versions?.length || 0 });
@@ -223,7 +203,6 @@ export function registerSkillTools(api, state) {
         parameters: Type.Object({ skillId: Type.String(), version: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.rollbackSkill(params.skillId, params.version);
             if (result.success)
                 return okResult('Rolled back to version: ' + params.version);
@@ -231,4 +210,3 @@ export function registerSkillTools(api, state) {
         },
     });
 }
-//# sourceMappingURL=skill-tools.js.map

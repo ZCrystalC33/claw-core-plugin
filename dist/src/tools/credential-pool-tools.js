@@ -1,4 +1,3 @@
-// STUB - Credential pool tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerCredentialPoolTools(api) {
@@ -14,4 +13,3 @@ export function registerCredentialPoolTools(api) {
         },
     });
 }
-//# sourceMappingURL=credential-pool-tools.js.map

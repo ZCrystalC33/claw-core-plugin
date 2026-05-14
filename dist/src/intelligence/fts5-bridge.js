@@ -1,22 +1,10 @@
-/**
- * FTS5 Bridge - HTTP-based FTS5 search integration
- *
- * Architecture:
- * - Primary: Direct Python subprocess (bypasses MCP HTTP dependency)
- * - Features: Privacy filter, token cost visibility, progressive disclosure
- *
- * Integration: privacy-filter.ts strips <private> tags before indexing
- */
 import { config } from './config.js';
-// FTS5 HTTP MCP URL - used by the plugin directly in index.ts
 const FTS5_MCP_URL = config.fts5.mcpUrl;
 const FTS5_PORT = config.fts5.port;
-// FIX: Add timeout to prevent hanging on unavailable server
 const FTS5_TIMEOUT_MS = 10_000;
-// FIX: Health check to determine if FTS5 server is available
 let _serverAvailable = null;
 let _lastHealthCheck = 0;
-const HEALTH_CHECK_TTL_MS = 60_000; // 1 minute cache
+const HEALTH_CHECK_TTL_MS = 60_000;
 export async function fts5IsAvailable() {
     const now = Date.now();
     if (_serverAvailable !== null && (now - _lastHealthCheck) < HEALTH_CHECK_TTL_MS) {
@@ -42,9 +30,7 @@ export async function fts5IsAvailable() {
         return false;
     }
 }
-// HTTP-based FTS5 client
 export async function fts5HttpSearch(query, limit = 20) {
-    // FIX: Invalidate health cache on each search attempt (transient failures)
     _serverAvailable = null;
     try {
         const controller = new AbortController();
@@ -110,7 +96,6 @@ export async function fts5HttpStats() {
         return { total: 0, last_updated: new Date().toISOString() };
     }
 }
-// Re-export for compatibility with existing consumers
 export const fts5Bridge = {
     search: fts5HttpSearch,
     summarize: async (query, limit = 5) => {
@@ -122,4 +107,3 @@ export const fts5Bridge = {
     get_stats: fts5HttpStats,
     isAvailable: fts5IsAvailable,
 };
-//# sourceMappingURL=fts5-bridge.js.map

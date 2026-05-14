@@ -1,4 +1,3 @@
-// STUB - Persistence tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerPersistenceTools(api) {
@@ -26,4 +25,3 @@ export function registerPersistenceTools(api) {
         },
     });
 }
-//# sourceMappingURL=persistence-tools.js.map

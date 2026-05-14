@@ -1,4 +1,3 @@
-// STUB - Events tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerEventsTools(api) {
@@ -15,4 +14,3 @@ export function registerEventsTools(api) {
         },
     });
 }
-//# sourceMappingURL=events-tools.js.map

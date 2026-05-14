@@ -1,4 +1,3 @@
-// STUB - Error classifier tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerErrorClassifierTools(api) {
@@ -14,4 +13,3 @@ export function registerErrorClassifierTools(api) {
         },
     });
 }
-//# sourceMappingURL=error-classifier-tools.js.map

@@ -1,6 +1,3 @@
-/**
- * Signal Tools - Claw Core API format
- */
 import { Type } from '@sinclair/typebox';
 import { okResult, errResult } from '../intelligence/utils.js';
 import { SignalStore } from './signal-store.js';
@@ -167,4 +164,3 @@ export function registerSignalTools(api, _state) {
         }
     });
 }
-//# sourceMappingURL=tools.js.map

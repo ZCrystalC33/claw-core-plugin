@@ -1,6 +1,3 @@
-/**
- * Core Tools - Original ZCrystal features
- */
 import { Type } from '@sinclair/typebox';
 import { okResult, errResult } from '../index.js';
 function isResult(val) {
@@ -28,7 +25,6 @@ function unwrapString(val) {
     return '';
 }
 export function registerCoreTools(api, state) {
-    // zcrystal_evo_health
     api.registerTool({
         name: 'zcrystal_evo_health',
         label: 'ZCrystal Evo Health',
@@ -41,7 +37,6 @@ export function registerCoreTools(api, state) {
             return errResult(result.error ?? 'Health check failed');
         },
     });
-    // zcrystal_search
     api.registerTool({
         name: 'zcrystal_search',
         label: 'ZCrystal Search',
@@ -49,9 +44,7 @@ export function registerCoreTools(api, state) {
         parameters: Type.Object({ query: Type.String(), limit: Type.Optional(Type.Number()) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const limit = params.limit || 10;
-            // H3 FIX: query passed as argv, not embedded in python string — prevents command injection
             try {
                 const { spawn } = await import('node:child_process');
                 const result = await new Promise((resolve, reject) => {
@@ -71,7 +64,6 @@ export function registerCoreTools(api, state) {
                 return errResult('No results found');
             }
             catch (err) {
-                // Fallback to Honcho if FTS5 fails
                 const honchoResult = await state.honcho.search(params.query, limit);
                 if (honchoResult.ok && Array.isArray(honchoResult.data) && honchoResult.data.length > 0) {
                     return okResult(JSON.stringify(honchoResult.data, null, 2), { count: honchoResult.data.length });
@@ -80,7 +72,6 @@ export function registerCoreTools(api, state) {
             }
         },
     });
-    // zcrystal_ask_user
     api.registerTool({
         name: 'zcrystal_ask_user',
         label: 'ZCrystal Ask User',
@@ -88,21 +79,18 @@ export function registerCoreTools(api, state) {
         parameters: Type.Object({ question: Type.String(), depth: Type.Optional(Type.String()) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.honcho.ask('user', params.question, params.depth || 'quick');
             if (result.ok && result.data)
                 return okResult(result.data, { question: params.question });
             return errResult('Ask failed');
         },
     });
-    // zcrystal_skills
     api.registerTool({
         name: 'zcrystal_skills',
         label: 'ZCrystal Skills',
         description: 'List all available skills',
         parameters: Type.Object({}),
         async execute(_id, _params) {
-            // FIX: Use helper type guards instead of inline casting
             const result = await state.skillManager.getSkills();
             const skills = unwrapSkills(result);
             const text = skills.length === 0
@@ -111,7 +99,6 @@ export function registerCoreTools(api, state) {
             return okResult(text, { count: skills.length });
         },
     });
-    // zcrystal_skill_read
     api.registerTool({
         name: 'zcrystal_skill_read',
         label: 'ZCrystal Skill Read',
@@ -119,8 +106,6 @@ export function registerCoreTools(api, state) {
         parameters: Type.Object({ slug: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            // FIX: Use helper type guards instead of inline casting
             const skillResult = await state.skillManager.getSkill(params.slug);
             const skill = unwrapSkill(skillResult);
             if (!skill)
@@ -132,7 +117,6 @@ export function registerCoreTools(api, state) {
             return okResult(content, { slug: params.slug });
         },
     });
-    // zcrystal_evolution_status
     api.registerTool({
         name: 'zcrystal_evolution_status',
         label: 'ZCrystal Evolution Status',
@@ -145,7 +129,6 @@ export function registerCoreTools(api, state) {
             return errResult('Evolution status unavailable');
         },
     });
-    // zcrystal_evolve
     api.registerTool({
         name: 'zcrystal_evolve',
         label: 'ZCrystal Evolve',
@@ -153,14 +136,12 @@ export function registerCoreTools(api, state) {
         parameters: Type.Object({ slug: Type.Optional(Type.String()), iterations: Type.Optional(Type.Number()) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.router.startEvolution(params.slug);
             if (result.success)
                 return okResult('Evolution started', result.data);
             return errResult(result.error ?? 'Evolution failed');
         },
     }, { optional: true });
-    // zcrystal_record_trace
     api.registerTool({
         name: 'zcrystal_record_trace',
         label: 'ZCrystal Record Trace',
@@ -171,7 +152,6 @@ export function registerCoreTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 if (!state?.traceStore) {
                     state?.logger?.warning('[ZCrystal] traceStore not available');
@@ -186,7 +166,6 @@ export function registerCoreTools(api, state) {
                     timestamp: Date.now(),
                     durationMs: params.duration || 0,
                 };
-                // Cast to any to bypass strict typing mismatch (store expects TypedId, we pass string id)
                 await state.traceStore.saveTrace(trace);
                 state.logger?.info('[ZCrystal] Trace saved', { skillSlug: params.skillSlug, success: params.success });
                 return okResult('Trace recorded', { skillSlug: params.skillSlug, traceId: trace.id });
@@ -197,10 +176,6 @@ export function registerCoreTools(api, state) {
             }
         },
     }, { optional: true });
-    // ============================================================
-    // Progressive Disclosure Tools (Claude-Mem inspired)
-    // ============================================================
-    // Layer 1: Memory index with token cost visibility
     api.registerTool({
         name: 'zcrystal_memory_index',
         label: 'ZCrystal Memory Index',
@@ -211,7 +186,6 @@ export function registerCoreTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const limit = params.limit || 20;
             try {
                 const { getMemoryIndex, formatMemoryIndexTable } = await import('../memory/progressive.js');
@@ -224,7 +198,6 @@ export function registerCoreTools(api, state) {
             }
         },
     }, { optional: true });
-    // Layer 3: Fetch full observation by ID
     api.registerTool({
         name: 'zcrystal_memory_get',
         label: 'ZCrystal Memory Get',
@@ -234,7 +207,6 @@ export function registerCoreTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const { getMemoryEntryById } = await import('../memory/progressive.js');
                 const content = await getMemoryEntryById(params.id);
@@ -247,9 +219,6 @@ export function registerCoreTools(api, state) {
             }
         },
     }, { optional: true });
-    // Self-Doubt Recall - Agent self-triggered memory recovery
-    // Use when Agent suspects memory gaps: "我不記得", "不確定", "需要確認"
-    // Also checks for pending recall from auto-detection (before_prompt_build hook)
     api.registerTool({
         name: 'zcrystal_recall',
         label: 'ZCrystal Recall',
@@ -260,10 +229,8 @@ export function registerCoreTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const limit = params.limit || 5;
             try {
-                // First check if there's pending recall from auto-detection
                 let recallSource = 'manual';
                 let results = '';
                 if (state) {
@@ -278,11 +245,9 @@ export function registerCoreTools(api, state) {
                             }
                         }
                         catch {
-                            // Fall through to manual search
                         }
                     }
                 }
-                // If no pending recall, do manual search
                 if (!results) {
                     const { quickRecall } = await import('../memory/recall.js');
                     results = await quickRecall(params.query, limit);
@@ -298,4 +263,3 @@ export function registerCoreTools(api, state) {
         },
     }, { optional: true });
 }
-//# sourceMappingURL=core-tools.js.map

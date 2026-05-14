@@ -1,7 +1,3 @@
-/**
- * Decompose & Router Tools - Async bridge to Python efficiency_core
- * Replaces execSync with async child_process for non-blocking execution.
- */
 import { Type } from '@sinclair/typebox';
 import { spawn } from 'node:child_process';
 import { okResult, errResult } from '../index.js';
@@ -57,7 +53,6 @@ function runPythonWithStdin(script, stdinData, timeoutMs = 30000) {
     });
 }
 export function registerDecomposeRouterTools(api) {
-    // ─── Decompose ───────────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_decompose',
         label: '🔪 ClawCore Decompose',
@@ -67,7 +62,6 @@ export function registerDecomposeRouterTools(api) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const script = `
 import sys
@@ -116,7 +110,6 @@ print(json.dumps(decomp))
             }
         },
     });
-    // ─── Route Task ──────────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_route_task',
         label: '🧭 ClawCore Route Task',
@@ -127,7 +120,6 @@ print(json.dumps(decomp))
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const script = `
 import sys
@@ -170,7 +162,6 @@ print(json.dumps({"decisions": routes, "total": len(routes)}))
             }
         },
     });
-    // ─── Router Status ───────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_router_status',
         label: '📡 Router Status',
@@ -199,7 +190,6 @@ print(json.dumps({'stats': stats, 'type': type(router).__name__}))
             }
         },
     });
-    // ─── Quick Run ────────────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_quick_run',
         label: '⚡ ClawCore Quick Run',
@@ -209,7 +199,6 @@ print(json.dumps({'stats': stats, 'type': type(router).__name__}))
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const script = `
 import sys
@@ -233,4 +222,3 @@ print(json.dumps(result, default=str))
         },
     });
 }
-//# sourceMappingURL=decompose-router.js.map

@@ -13,4 +13,3 @@ const handler = async (event) => {
     console.log(`[claw-core:session-compact-after] Tokens: ~${tokensBefore} → ~${tokensAfter} (saved ~${savedTokens}, ${efficiency}%)`);
 };
 export default handler;
-//# sourceMappingURL=handler.js.map

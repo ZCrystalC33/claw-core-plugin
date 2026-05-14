@@ -3,9 +3,8 @@
  * Extracted from register.ts for modularity
  */
 
-import { config as zcrystalConfig } from '../config.js';
-
-const FTS5_MCP_URL = zcrystalConfig.fts5.mcpUrl;
+// FTS5 MCP via OpenClaw Gateway MCP endpoint (handles LSP framing internally)
+const FTS5_MCP_URL = 'http://localhost:18789/mcp';
 
 export async function fts5Search(query: string, limit = 20) {
   try {

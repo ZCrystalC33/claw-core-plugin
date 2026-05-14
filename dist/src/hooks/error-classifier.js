@@ -1,18 +1,3 @@
-/**
- * Error Classifier Hook
- *
- * Registers on `after_tool_call` to intercept tool execution errors,
- * classify them by category, and provide actionable recovery suggestions.
- *
- * Error categories:
- * - NETWORK: Connection/timeout errors
- * - AUTH: Authentication/authorization failures
- * - VALIDATION: Input/parameter validation errors
- * - RATE_LIMIT: API rate limiting errors
- * - TIMEOUT: Execution timeout
- * - SYSTEM: Internal system errors
- * - UNKNOWN: Uncategorized errors
- */
 const NETWORK_PATTERNS = [
     'ECONNREFUSED', 'ENOTFOUND', 'ECONNRESET', 'ETIMEDOUT',
     'fetch failed', 'NetworkError', 'net::ERR', 'connection failed',
@@ -36,12 +21,8 @@ const TIMEOUT_PATTERNS = [
     'timeout', 'TIMEOUT', 'timed out', 'deadline',
     'request timeout', 'operation timeout',
 ];
-/**
- * Classify a tool error into a category and generate a suggestion
- */
 export function classifyError(errorMessage) {
     const msg = errorMessage.toLowerCase();
-    // NETWORK errors
     if (NETWORK_PATTERNS.some(p => msg.includes(p.toLowerCase()))) {
         return {
             category: 'NETWORK',
@@ -50,7 +31,6 @@ export function classifyError(errorMessage) {
             severity: 'medium',
         };
     }
-    // AUTH errors
     if (AUTH_PATTERNS.some(p => msg.includes(p.toLowerCase()))) {
         return {
             category: 'AUTH',
@@ -59,7 +39,6 @@ export function classifyError(errorMessage) {
             severity: 'high',
         };
     }
-    // RATE_LIMIT errors
     if (RATE_LIMIT_PATTERNS.some(p => msg.includes(p.toLowerCase()))) {
         return {
             category: 'RATE_LIMIT',
@@ -68,7 +47,6 @@ export function classifyError(errorMessage) {
             severity: 'low',
         };
     }
-    // TIMEOUT errors
     if (TIMEOUT_PATTERNS.some(p => msg.includes(p.toLowerCase()))) {
         return {
             category: 'TIMEOUT',
@@ -77,7 +55,6 @@ export function classifyError(errorMessage) {
             severity: 'medium',
         };
     }
-    // VALIDATION errors
     if (VALIDATION_PATTERNS.some(p => msg.includes(p.toLowerCase()))) {
         return {
             category: 'VALIDATION',
@@ -86,7 +63,6 @@ export function classifyError(errorMessage) {
             severity: 'medium',
         };
     }
-    // System errors
     if (msg.includes('internal server error') || msg.includes('panic') || msg.includes('assertion')) {
         return {
             category: 'SYSTEM',
@@ -95,7 +71,6 @@ export function classifyError(errorMessage) {
             severity: 'high',
         };
     }
-    // Unknown
     return {
         category: 'UNKNOWN',
         suggestion: 'An unexpected error occurred. Check logs for details. Consider retrying or simplifying the operation.',
@@ -103,16 +78,13 @@ export function classifyError(errorMessage) {
         severity: 'medium',
     };
 }
-/**
- * Create the Error Classifier Hook
- */
 export function createErrorClassifierHook(_api) {
     return {
         name: 'clawcore:error-classifier',
         hookKey: 'after_tool_call',
         async handler(event) {
             if (!event.error)
-                return; // No error to classify
+                return;
             const { toolName, error, durationMs } = event;
             const classification = classifyError(error);
             const logLine = `[ZCrystal:error-classifier] Tool="${toolName || 'unknown'}" ` +
@@ -128,10 +100,7 @@ export function createErrorClassifierHook(_api) {
             else {
                 console.warn(logLine);
             }
-            // Store classification in a way the agent can access via tool context
-            // (e.g., lastErrorClassification on the tool context)
             event._zcrystal_error_classification = classification;
         },
     };
 }
-//# sourceMappingURL=error-classifier.js.map

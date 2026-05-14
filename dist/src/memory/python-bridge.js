@@ -1,11 +1,3 @@
-/**
- * Python Bridge - Unified access to efficiency_core Memory subsystems
- *
- * Integrates Python's MemoryQueryInterface + KnowledgeFusion + ZCrystalInterface
- * with TypeScript plugin memory tools.
- *
- * All calls use stdin JSON serialization (H1-H5 security pattern).
- */
 import { spawn } from 'node:child_process';
 const CORE_CWD = '/home/snow/.openclaw/workspace/openclaw-efficiency-core';
 function runPythonWithStdin(script, stdinData, timeoutMs = 30000) {
@@ -28,9 +20,6 @@ function runPythonWithStdin(script, stdinData, timeoutMs = 30000) {
         py.stdin.end();
     });
 }
-/**
- * Search across multiple memory sources using Python MemoryQueryInterface
- */
 export async function mqiSearch(query, sources = ['fts5', 'wiki', 'honcho'], limit = 20) {
     const script = `
 import sys
@@ -58,9 +47,6 @@ print(json.dumps(output))
     const raw = await runPythonWithStdin(script, {});
     return JSON.parse(raw);
 }
-/**
- * Fuse knowledge from multiple sources
- */
 export async function fuseKnowledge(entries, query) {
     const script = `
 import sys
@@ -82,9 +68,6 @@ print(json.dumps([{k: getattr(e, k) for k in ["id", "content", "source", "confid
     const raw = await runPythonWithStdin(script, {});
     return raw;
 }
-/**
- * Get learned patterns from Python ZCrystal store
- */
 export async function zcrystalGetPatterns(skillSlug) {
     const script = `
 import sys
@@ -102,12 +85,6 @@ print(json.dumps([p.to_dict() for p in filtered]))
     const raw = await runPythonWithStdin(script, {}, 45000);
     return JSON.parse(raw);
 }
-// ============================================================================
-// Memory Bank Progressive Disclosure (Layered Access)
-// ============================================================================
-/**
- * Layer 1: Quick index (metadata only, ~50 tokens/entry)
- */
 export async function memoryBankIndex(query, limit = 20) {
     const results = await mqiSearch(query, ['fts5'], limit);
     if (!results[0]?.records?.length)
@@ -132,9 +109,6 @@ export async function memoryBankIndex(query, limit = 20) {
     md += `\n💡 Fetch full: \`zcrystal_mqi_read id=<ID>\`\n`;
     return md;
 }
-/**
- * Layer 2: Read full entry by FTS5 rowid
- */
 export async function memoryBankRead(id) {
     const script = `
 import sys
@@ -155,14 +129,7 @@ else:
         return `Entry #${id} not found`;
     return `**From:** ${data.sender} | **Time:** ${data.timestamp}\n\n${data.content}`;
 }
-// ============================================================================
-// Context Compressor Integration
-// ============================================================================
-/**
- * Compress context using Python MemoryQueryInterface for deduplication
- */
 export async function compressContextWithMQI(messages, maxMessages = 40, maxMessageLength = 8000) {
-    // Python side deduplicates similar tool results
     const script = `
 import sys
 import json
@@ -202,4 +169,3 @@ print(json.dumps({"compressed": result, "savedTokens": before_tokens - after_tok
     const raw = await runPythonWithStdin(script, messages, 15000);
     return JSON.parse(raw);
 }
-//# sourceMappingURL=python-bridge.js.map

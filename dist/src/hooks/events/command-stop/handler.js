@@ -8,4 +8,3 @@ const handler = async (event) => {
     console.log(`[claw-core:command-stop] Source: ${commandSource}`);
 };
 export default handler;
-//# sourceMappingURL=handler.js.map

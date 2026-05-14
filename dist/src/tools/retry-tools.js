@@ -1,4 +1,3 @@
-// STUB - Retry tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerRetryTools(api) {
@@ -15,4 +14,3 @@ export function registerRetryTools(api) {
         },
     });
 }
-//# sourceMappingURL=retry-tools.js.map

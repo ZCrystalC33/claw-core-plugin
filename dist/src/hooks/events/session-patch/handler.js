@@ -9,4 +9,3 @@ const handler = async (event) => {
     console.log(`[claw-core:session-patch] Changed fields: ${changedFields.join(', ')}`);
 };
 export default handler;
-//# sourceMappingURL=handler.js.map

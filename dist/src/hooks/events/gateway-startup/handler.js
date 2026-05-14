@@ -7,7 +7,6 @@ const handler = async (event) => {
     const version = ctx.version ?? 'unknown';
     console.log(`[claw-core:gateway-startup] Gateway started v${version}`);
     console.log(`[claw-core:gateway-startup] Channels: ${channelCount}, Hooks: ${hookCount}`);
-    // Verify critical paths exist
     try {
         const { stat } = await import('node:fs/promises');
         const paths = [
@@ -29,4 +28,3 @@ const handler = async (event) => {
     }
 };
 export default handler;
-//# sourceMappingURL=handler.js.map

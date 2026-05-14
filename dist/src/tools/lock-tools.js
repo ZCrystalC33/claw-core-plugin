@@ -1,4 +1,3 @@
-// STUB - Lock tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerLockTools(api) {
@@ -25,4 +24,3 @@ export function registerLockTools(api) {
         },
     });
 }
-//# sourceMappingURL=lock-tools.js.map

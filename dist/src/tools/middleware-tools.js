@@ -1,4 +1,3 @@
-// STUB - Middleware tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerMiddlewareTools(api) {
@@ -14,4 +13,3 @@ export function registerMiddlewareTools(api) {
         },
     });
 }
-//# sourceMappingURL=middleware-tools.js.map

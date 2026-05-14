@@ -1,4 +1,3 @@
-// STUB - Serializers tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerSerializersTools(api) {
@@ -27,4 +26,3 @@ export function registerSerializersTools(api) {
         },
     });
 }
-//# sourceMappingURL=serializers-tools.js.map

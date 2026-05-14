@@ -1,10 +1,6 @@
-/**
- * Review, Hook, Evolution Coordinator Tools
- */
 import { Type } from '@sinclair/typebox';
 import { okResult, errResult } from '../index.js';
 export function registerSystemTools(api, state) {
-    // ReviewEngine Tools
     api.registerTool({
         name: 'zcrystal_review_stats',
         label: 'ZCrystal Review Stats',
@@ -36,13 +32,10 @@ export function registerSystemTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             state.reviewEngine.onTaskCompleted(params.taskId, params.taskType, params.toolChain, params.success, params.durationMs, params.userId, params.error);
             return okResult('Recorded: ' + params.taskId);
         },
     });
-    // Hooks Registry Tools
-    // Local custom hook store for dynamic registration (complements OpenClaw's api.registerHook)
     const customHooks = new Map();
     api.registerTool({
         name: 'zcrystal_hook_register',
@@ -50,18 +43,13 @@ export function registerSystemTools(api, state) {
         description: 'Register a dynamic hook handler (stored locally, dispatched via hook_dispatch)',
         parameters: Type.Object({
             name: Type.Union([Type.Literal('message:received'), Type.Literal('after_tool_call'), Type.Literal('before_prompt_build')]),
-            handler: Type.String(), // Serialized handler reference
+            handler: Type.String(),
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            // FIX: Actually register the hook handler locally
             if (!customHooks.has(params.name)) {
                 customHooks.set(params.name, []);
             }
-            // Parse and store the handler (deserialize from string)
-            // Note: Since we can't serialize functions, we store a reference name
-            // and let hook_dispatch invoke it
             const handlers = customHooks.get(params.name);
             const handlerRef = `handler_${Date.now()}`;
             handlers.push(async (ctx) => {
@@ -80,11 +68,8 @@ export function registerSystemTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const ctx = params.context || {};
-            // Dispatch to @zcrystal/evo hookRegistry first
             await state.hookRegistry.dispatch(params.name, ctx);
-            // Then dispatch to custom locally-registered hooks
             const custom = customHooks.get(params.name);
             if (custom) {
                 for (const handler of custom) {
@@ -105,7 +90,6 @@ export function registerSystemTools(api, state) {
         description: 'List registered hooks (built-in + custom)',
         parameters: Type.Object({}),
         async execute(_id, _params) {
-            // Return actual registered custom hooks count per type
             const hooks = {
                 'message:received': { custom: customHooks.get('message:received')?.length || 0, builtIn: true },
                 'after_tool_call': { custom: customHooks.get('after_tool_call')?.length || 0, builtIn: true },
@@ -114,7 +98,6 @@ export function registerSystemTools(api, state) {
             return okResult(JSON.stringify(hooks, null, 2));
         },
     });
-    // EvolutionCoordinator Tools
     api.registerTool({
         name: 'zcrystal_coordinator_status',
         label: 'ZCrystal Coordinator Status',
@@ -131,7 +114,6 @@ export function registerSystemTools(api, state) {
         parameters: Type.Object({ skillId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await state.evolutionCoordinator.evolveOne(params.skillId, '');
             return okResult('Evolution triggered for: ' + params.skillId);
         },
@@ -155,7 +137,6 @@ export function registerSystemTools(api, state) {
             return okResult(JSON.stringify({ status: 'Use coordinator_status to check progress' }, null, 2));
         },
     });
-    // Scheduler Tools
     api.registerTool({
         name: 'zcrystal_scheduler_start',
         label: 'ZCrystal Scheduler Start',
@@ -183,4 +164,3 @@ export function registerSystemTools(api, state) {
         },
     });
 }
-//# sourceMappingURL=system-tools.js.map

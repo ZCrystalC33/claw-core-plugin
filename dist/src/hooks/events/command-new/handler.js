@@ -7,7 +7,6 @@ const handler = async (event) => {
     const previousEntry = ctx.previousSessionEntry;
     console.log(`[claw-core:command-new] New session started: ${sessionKey}`);
     console.log(`[claw-core:command-new] Source: ${commandSource}`);
-    // If there was a previous session, log summary statistics
     if (previousEntry) {
         const messageCount = previousEntry.messageCount ?? 0;
         const duration = previousEntry.duration ?? 'unknown';
@@ -15,4 +14,3 @@ const handler = async (event) => {
     }
 };
 export default handler;
-//# sourceMappingURL=handler.js.map

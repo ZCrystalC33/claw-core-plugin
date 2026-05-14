@@ -14,4 +14,3 @@ const handler = async (event) => {
     }
 };
 export default handler;
-//# sourceMappingURL=handler.js.map

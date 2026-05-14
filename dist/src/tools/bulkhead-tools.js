@@ -1,4 +1,3 @@
-// STUB - Bulkhead tools (concurrency limiting)
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerBulkheadTools(api) {
@@ -19,4 +18,3 @@ export function registerBulkheadTools(api) {
         },
     });
 }
-//# sourceMappingURL=bulkhead-tools.js.map

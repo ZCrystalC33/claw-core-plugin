@@ -1,10 +1,6 @@
-/**
- * Workflow, Adapter, Replay Tools
- */
 import { Type } from '@sinclair/typebox';
 import { okResult, errResult } from '../index.js';
 export function registerWorkflowTools(api, state) {
-    // Workflow Tools
     api.registerTool({
         name: 'zcrystal_workflow_create',
         label: 'ZCrystal Workflow Create',
@@ -17,7 +13,6 @@ export function registerWorkflowTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const task = state.workflowEngine.createTask(params.userId, params.taskType, params.trigger, params.repr, params.input || {});
             return okResult('Workflow created: ' + task.id, { taskId: task.id });
         },
@@ -29,7 +24,6 @@ export function registerWorkflowTools(api, state) {
         parameters: Type.Object({ taskId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const task = state.workflowEngine.getTask(params.taskId);
             if (task)
                 return okResult(JSON.stringify(task, null, 2));
@@ -53,7 +47,6 @@ export function registerWorkflowTools(api, state) {
         parameters: Type.Object({ taskId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const success = state.workflowEngine.pauseTask(params.taskId);
             if (success)
                 return okResult('Workflow paused: ' + params.taskId);
@@ -67,7 +60,6 @@ export function registerWorkflowTools(api, state) {
         parameters: Type.Object({ taskId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const success = state.workflowEngine.resumeTask(params.taskId);
             if (success)
                 return okResult('Workflow resumed: ' + params.taskId);
@@ -81,14 +73,12 @@ export function registerWorkflowTools(api, state) {
         parameters: Type.Object({ taskId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const success = state.workflowEngine.cancelTask(params.taskId);
             if (success)
                 return okResult('Workflow cancelled: ' + params.taskId);
             return errResult('Failed to cancel workflow');
         },
     });
-    // Adapter Tools
     api.registerTool({
         name: 'zcrystal_adapter_scan_openclaw',
         label: 'ZCrystal Adapter Scan OpenClaw',
@@ -120,7 +110,6 @@ export function registerWorkflowTools(api, state) {
         parameters: Type.Object({ skillSlug: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.skillAdapter.importSkill(params.skillSlug);
             if (result.ok)
                 return okResult('Imported: ' + params.skillSlug, { skillId: result.data?.slug });
@@ -134,7 +123,6 @@ export function registerWorkflowTools(api, state) {
         parameters: Type.Object({ skillId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await state.skillAdapter.exportSkill(params.skillId);
             if (result.ok)
                 return okResult('Exported: ' + params.skillId);
@@ -153,7 +141,6 @@ export function registerWorkflowTools(api, state) {
             return errResult('Sync failed: ' + result.error);
         },
     });
-    // Replay Tools
     api.registerTool({
         name: 'zcrystal_replay_save',
         label: 'ZCrystal Replay Save',
@@ -164,7 +151,6 @@ export function registerWorkflowTools(api, state) {
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const replayCase = state.replayRunner.saveReplayCase(params.taskId, params.taskType, params.input, params.output);
             return okResult('Replay case saved', { caseId: replayCase.id });
         },
@@ -176,7 +162,6 @@ export function registerWorkflowTools(api, state) {
         parameters: Type.Object({ caseId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const replayCase = state.replayRunner.getCase(params.caseId);
             if (replayCase)
                 return okResult(JSON.stringify(replayCase, null, 2));
@@ -190,7 +175,6 @@ export function registerWorkflowTools(api, state) {
         parameters: Type.Object({ taskType: Type.Optional(Type.String()) }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let cases = [];
             if (params.taskType)
                 cases = state.replayRunner.getCasesForTaskType(params.taskType);
@@ -214,7 +198,6 @@ export function registerWorkflowTools(api, state) {
         parameters: Type.Object({ skillId: Type.String() }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = state.replayRunner.rollback(params.skillId);
             if (result.success)
                 return okResult('Rolled back to: ' + result.previousVersion);
@@ -222,4 +205,3 @@ export function registerWorkflowTools(api, state) {
         },
     });
 }
-//# sourceMappingURL=workflow-tools.js.map

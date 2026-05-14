@@ -1,4 +1,3 @@
-// STUB - Lazy tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerLazyTools(api) {
@@ -14,4 +13,3 @@ export function registerLazyTools(api) {
         },
     });
 }
-//# sourceMappingURL=lazy-tools.js.map

@@ -1,6 +1,3 @@
-/**
- * Tools Index - Re-exports all tool registration functions
- */
 export { registerBenchmarkTools } from './benchmark-tools.js';
 export { registerBulkheadTools } from './bulkhead-tools.js';
 export { registerCacheTools } from './cache-tools.js';
@@ -35,4 +32,3 @@ export { registerTaskTools } from './task-tools.js';
 export { registerTelemetryTools } from './telemetry-tools.js';
 export { registerWorkerpoolTools } from './workerpool-tools.js';
 export { registerWorkflowTools } from './workflow-tools.js';
-//# sourceMappingURL=index.js.map

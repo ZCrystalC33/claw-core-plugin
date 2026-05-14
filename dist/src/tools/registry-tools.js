@@ -1,4 +1,3 @@
-// STUB - Registry tools
 import { Type } from '@sinclair/typebox';
 import { okResult } from '../index.js';
 export function registerRegistryTools(api) {
@@ -26,4 +25,3 @@ export function registerRegistryTools(api) {
         },
     });
 }
-//# sourceMappingURL=registry-tools.js.map

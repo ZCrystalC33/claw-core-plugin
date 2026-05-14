@@ -1,6 +1,3 @@
-/**
- * Pipeline & StateMachine Tools - Bridge to Python efficiency_core.pipeline & statemachine
- */
 import { Type } from '@sinclair/typebox';
 import { execSync } from 'node:child_process';
 import { okResult, errResult } from '../index.js';
@@ -13,7 +10,6 @@ function runPython(script) {
     }).trim();
 }
 export function registerPipelineTools(api) {
-    // ─── Pipeline List ───────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_pipeline_list',
         label: '🔗 Pipeline List',
@@ -52,7 +48,6 @@ print(json.dumps(templates))
             }
         },
     });
-    // ─── Pipeline Run ─────────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_pipeline_run',
         label: '▶️ Run Pipeline',
@@ -64,7 +59,6 @@ print(json.dumps(templates))
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const script = `
 import sys
@@ -135,7 +129,6 @@ print(json.dumps({'pipeline': '${params.pipelineName}', 'context': result}, defa
             }
         },
     });
-    // ─── StateMachine ─────────────────────────────────────────────────
     api.registerTool({
         name: 'clawcore_sm_create',
         label: '🔄 Create StateMachine',
@@ -147,7 +140,6 @@ print(json.dumps({'pipeline': '${params.pipelineName}', 'context': result}, defa
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const statesJson = JSON.stringify(params.states).replace(/"/g, '\\"');
                 const transJson = JSON.stringify(params.transitions).replace(/'/g, "\\'");
@@ -183,7 +175,6 @@ print(json.dumps({'name': '${params.name}', 'states': ${statesJson}, 'transition
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const script = `
 import sys
@@ -217,7 +208,6 @@ except Exception as e:
         }),
         async execute(_id, _params) {
             const params = _params;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
                 const script = `
 import sys
@@ -237,4 +227,3 @@ print(json.dumps({'name': '${params.name}', 'state': sm.state, 'states': list(sm
         },
     });
 }
-//# sourceMappingURL=pipeline-tools.js.map

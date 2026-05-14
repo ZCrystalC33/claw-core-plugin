@@ -2,19 +2,15 @@ export class HonchoClient {
     baseUrl;
     workspace;
     apiKey;
-    // Memoize workspace check
     _workspaceChecked = false;
     _workspaceValid = false;
     _workspaceLastCheck = 0;
-    WORKSPACE_CACHE_TTL_MS = 60_000; // 1 minute TTL for workspace validation
+    WORKSPACE_CACHE_TTL_MS = 60_000;
     constructor(baseUrl, workspace, apiKey) {
         this.baseUrl = baseUrl.replace(/\/$/, '');
         this.workspace = workspace;
         this.apiKey = apiKey;
     }
-    // ============================================================
-    // Auth Helper
-    // ============================================================
     getHeaders() {
         const headers = {
             'Content-Type': 'application/json',
@@ -24,25 +20,17 @@ export class HonchoClient {
         }
         return headers;
     }
-    // ============================================================
-    // Workspace Management
-    // ============================================================
     async ensureWorkspace() {
-        // FIX: Return cached result only if within TTL and still valid
         const now = Date.now();
         if (this._workspaceChecked && this._workspaceValid && (now - this._workspaceLastCheck) < this.WORKSPACE_CACHE_TTL_MS) {
             return true;
         }
-        // FIX: Always retry if previous check failed (don't cache failures permanently)
-        // Only use cache if previous check was successful
         if (this._workspaceChecked && !this._workspaceValid && (now - this._workspaceLastCheck) < this.WORKSPACE_CACHE_TTL_MS) {
-            return false; // Recent failure, don't spam
+            return false;
         }
-        // P0 Fix: Add AbortController timeout to prevent permanent hang
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
         try {
-            // Try to get workspace first
             const resp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}`, {
                 headers: this.getHeaders(),
                 signal: controller.signal,
@@ -54,7 +42,6 @@ export class HonchoClient {
                 clearTimeout(timeoutId);
                 return true;
             }
-            // Create workspace if doesn't exist
             const createResp = await fetch(`${this.baseUrl}/v3/workspaces`, {
                 method: 'POST',
                 headers: this.getHeaders(),
@@ -79,19 +66,14 @@ export class HonchoClient {
             return false;
         }
     }
-    // ============================================================
-    // Peer Management
-    // ============================================================
     async peer(peerName) {
         try {
             await this.ensureWorkspace();
-            // Try to get existing peer
             const getResp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/peers/${peerName}`, { headers: this.getHeaders() });
             if (getResp.ok) {
                 const data = await getResp.json();
                 return { id: data.id, name: data.name, metadata: data.metadata };
             }
-            // Create new peer
             const createResp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/peers`, {
                 method: 'POST',
                 headers: this.getHeaders(),
@@ -109,11 +91,10 @@ export class HonchoClient {
     }
     async listPeers() {
         try {
-            // Correct: POST /v3/workspaces/{workspace_id}/peers/list
             const resp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/peers/list`, {
                 method: 'POST',
                 headers: this.getHeaders(),
-                body: JSON.stringify({}), // Empty body for list
+                body: JSON.stringify({}),
             });
             if (resp.ok) {
                 const data = await resp.json();
@@ -129,19 +110,14 @@ export class HonchoClient {
             return [];
         }
     }
-    // ============================================================
-    // Session Management
-    // ============================================================
     async session(sessionName, _peerIds = []) {
         try {
             await this.ensureWorkspace();
-            // Try to get existing session first
             const getResp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/sessions/${sessionName}`, { headers: this.getHeaders() });
             if (getResp.ok) {
                 const data = await getResp.json();
                 return { id: data.id, name: data.name };
             }
-            // Create new session
             const createResp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/sessions`, {
                 method: 'POST',
                 headers: this.getHeaders(),
@@ -159,7 +135,6 @@ export class HonchoClient {
     }
     async listSessions() {
         try {
-            // POST /v3/workspaces/{workspace_id}/sessions/list
             const resp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/sessions/list`, {
                 method: 'POST',
                 headers: this.getHeaders(),
@@ -178,21 +153,13 @@ export class HonchoClient {
             return [];
         }
     }
-    // ============================================================
-    // Safety Gates (prevent feedback loops & runaway writes)
-    // ============================================================
     _writeCountToday = 0;
     _writeCountDate = '';
     _lastWriteHashes = [];
     MAX_WRITES_PER_DAY = 1000;
-    DEDUP_WINDOW = 10; // Track last N hashes for batch deduplication
-    /**
-     * Check and record write with proper batch deduplication.
-     * Returns true only if ALL messages pass the gate.
-     */
+    DEDUP_WINDOW = 10;
     _checkAndRecordWrite(messages) {
         const today = new Date().toISOString().slice(0, 10);
-        // FIX: Reset counter on day change even if no writes happened yesterday
         if (this._writeCountDate !== today) {
             this._writeCountDate = today;
             this._writeCountToday = 0;
@@ -202,8 +169,6 @@ export class HonchoClient {
             console.warn(`[ZCrystal Honcho] Daily write limit reached (${this.MAX_WRITES_PER_DAY}). Blocked.`);
             return false;
         }
-        // FIX: Check each message's hash against the dedup window
-        // If ANY message is new, we proceed (don't reject entire batch)
         const hashes = messages.map(m => m.content.slice(0, 200).replace(/\s+/g, ' ').trim());
         const allDuplicate = hashes.every(h => this._lastWriteHashes.includes(h));
         if (allDuplicate && hashes.length > 0) {
@@ -211,7 +176,6 @@ export class HonchoClient {
             return false;
         }
         this._writeCountToday += messages.length;
-        // Update dedup window (keep last N unique hashes)
         for (const h of hashes) {
             if (!this._lastWriteHashes.includes(h)) {
                 this._lastWriteHashes.push(h);
@@ -222,17 +186,12 @@ export class HonchoClient {
         }
         return true;
     }
-    // ============================================================
-    // Messages - Write via POST, Read via Session Context
-    // ============================================================
     async addMessages(sessionName, messages) {
-        // Safety gate: check ALL messages before writing
         if (messages.length > 0 && !this._checkAndRecordWrite(messages)) {
             return false;
         }
         try {
             await this.ensureWorkspace();
-            // Convert to snake_case for API
             const apiMessages = messages.map(m => ({
                 content: m.content,
                 peer_id: m.peerId,
@@ -248,11 +207,6 @@ export class HonchoClient {
             return false;
         }
     }
-    /**
-     * Get messages via Session Context endpoint
-     * Note: Honcho doesn't have a direct GET /messages endpoint
-     * Messages are retrieved as part of session context
-     */
     async getMessages(sessionName, limit) {
         try {
             const params = new URLSearchParams();
@@ -261,7 +215,6 @@ export class HonchoClient {
             const resp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/sessions/${sessionName}/context?${params}`, { headers: this.getHeaders() });
             if (resp.ok) {
                 const data = await resp.json();
-                // Context returns content which may include message summaries
                 if (data.content) {
                     return [{ id: 'context', content: data.content, peerId: 'system', timestamp: Date.now() }];
                 }
@@ -272,15 +225,10 @@ export class HonchoClient {
             return [];
         }
     }
-    // ============================================================
-    // Semantic Search
-    // ============================================================
     async search(peerName, query, limit = 10) {
         try {
-            // P0 Fix: Add AbortController timeout to prevent permanent hang
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000);
-            // Search all messages in workspace
             const resp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/search`, {
                 method: 'POST',
                 headers: this.getHeaders(),
@@ -298,13 +246,6 @@ export class HonchoClient {
             return [];
         }
     }
-    // ============================================================
-    // User Modeling - Representation & Chat
-    // ============================================================
-    /**
-     * Ask a peer (uses dialectic reasoning)
-     * POST /v3/workspaces/{workspace_id}/peers/{peer_id}/chat
-     */
     async ask(peerName, question, depth = 'quick') {
         try {
             const resp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/peers/${peerName}/chat`, {
@@ -316,7 +257,6 @@ export class HonchoClient {
                 const data = await resp.json();
                 return data.content || '';
             }
-            // Log error for debugging
             const errorText = await resp.text();
             console.error(`[HonchoClient] ask() failed: ${resp.status} - ${errorText}`);
             return '';
@@ -326,16 +266,12 @@ export class HonchoClient {
             return '';
         }
     }
-    /**
-     * Get peer representation (summary of what Honcho knows about the peer)
-     * POST /v3/workspaces/{workspace_id}/peers/{peer_id}/representation
-     */
     async getUserModel(peerName) {
         try {
             const resp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/peers/${peerName}/representation`, {
                 method: 'POST',
                 headers: this.getHeaders(),
-                body: JSON.stringify({}), // Empty body gets full representation
+                body: JSON.stringify({}),
             });
             if (resp.ok) {
                 return await resp.json();
@@ -349,9 +285,6 @@ export class HonchoClient {
             return null;
         }
     }
-    // ============================================================
-    // Session Context
-    // ============================================================
     async getSessionContext(sessionName, options = {}) {
         try {
             const params = new URLSearchParams();
@@ -369,9 +302,6 @@ export class HonchoClient {
             return { content: '' };
         }
     }
-    // ============================================================
-    // Health Check
-    // ============================================================
     async healthCheck() {
         try {
             const resp = await fetch(`${this.baseUrl}/health`);
@@ -381,12 +311,8 @@ export class HonchoClient {
             return false;
         }
     }
-    // ============================================================
-    // User Learning - Send user message for Honcho to learn from
-    // ============================================================
     async learnFromUser(userId, message) {
         try {
-            // Store trace in zcrystal-traces session for user analysis
             const traceData = JSON.stringify({
                 type: 'trace',
                 skill: userId,
@@ -404,9 +330,6 @@ export class HonchoClient {
             return false;
         }
     }
-    // ============================================================
-    // Queue Status (for checking if deriver is working)
-    // ============================================================
     async getQueueStatus() {
         try {
             const resp = await fetch(`${this.baseUrl}/v3/workspaces/${this.workspace}/queue/status`, { headers: this.getHeaders() });
@@ -420,9 +343,6 @@ export class HonchoClient {
             return null;
         }
     }
-    // ============================================================
-    // Traces - Get traces for user analysis
-    // ============================================================
     async getTraces(skillSlug) {
         try {
             const messages = await this.getMessages('zcrystal-traces', 100);
@@ -452,18 +372,9 @@ export class HonchoClient {
             return [];
         }
     }
-    // ============================================================
-    // Message Lifecycle (FIX: Add missing CRUD operations)
-    // ============================================================
-    /**
-     * Update a message by appending to session context.
-     * Note: Honcho API doesn't support direct message updates; this implements
-     * a workaround by adding a correction message with the same peerId.
-     */
     async updateMessage(sessionName, messageId, newContent, peerId) {
         try {
             await this.ensureWorkspace();
-            // Append a correction entry referencing the original message
             const correctionPayload = [{
                     role: 'correction',
                     content: newContent,
@@ -481,18 +392,10 @@ export class HonchoClient {
             return false;
         }
     }
-    /**
-     * Delete messages by filtering them from the session.
-     * Note: Honcho API doesn't support direct message deletion; this implements
-     * a soft-delete by marking messages as deleted in metadata.
-     */
     async deleteMessage(sessionName, messageId) {
         try {
             await this.ensureWorkspace();
-            // Soft-delete via metadata update (if supported)
-            // Fallback: we can't truly delete, but we can record the intent
             console.debug(`[HonchoClient] Soft-delete requested for message ${messageId} in session ${sessionName}`);
-            // Mark deletion in zcrystal-traces
             const deleteEntry = JSON.stringify({
                 type: 'delete',
                 messageId,
@@ -502,7 +405,7 @@ export class HonchoClient {
             await this.addMessages('zcrystal-traces', [
                 { content: deleteEntry, peerId: 'system' },
             ]);
-            return true; // Soft-delete always succeeds
+            return true;
         }
         catch {
             return false;
@@ -512,4 +415,3 @@ export class HonchoClient {
 export function createHonchoClient(config = {}) {
     return new HonchoClient(config.baseUrl || 'http://localhost:8000', config.workspace || 'openclaw', config.apiKey);
 }
-//# sourceMappingURL=honcho-client.js.map
