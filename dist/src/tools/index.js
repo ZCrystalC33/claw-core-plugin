@@ -31,4 +31,5 @@ export { registerSystemTools } from './system-tools.js';
 export { registerTaskTools } from './task-tools.js';
 export { registerTelemetryTools } from './telemetry-tools.js';
 export { registerWorkerpoolTools } from './workerpool-tools.js';
+export { registerObservatoryTools } from './observatory-tools.js';
 export { registerWorkflowTools } from './workflow-tools.js';

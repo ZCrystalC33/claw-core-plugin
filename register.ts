@@ -119,6 +119,7 @@ import {
   registerEventsTools,
   registerFeaturesTools,
   registerHealthTools,
+  registerObservatoryTools,
   registerLazyTools,
   registerLockTools,
   registerMetricsTools,
@@ -673,6 +674,7 @@ export default definePluginEntry({
       registerErrorClassifierTools(api);
       registerFeaturesTools(api);
       registerLazyTools(api);
+      registerObservatoryTools(api);
       registerLockTools(api);
       registerQuotaTools(api);
       registerSerializersTools(api);
@@ -1197,6 +1199,33 @@ export default definePluginEntry({
       }
     }, { name: 'zcrystal:context-compressor' });
 
+    // Observatory: Memory Observer Hook
+    // Proactively inject relevant context based on intent detection
+    api.registerHook('message:preprocessed', async (event: unknown) => {
+      const ctx = event as { bodyForAgent?: string; from?: string; [key: string]: unknown };
+      const bodyForAgent = ctx.bodyForAgent as string || '';
+      if (bodyForAgent.length < 5) return;
+
+      try {
+        const { detectIntent, buildMemoryContext, formatContextForAgent } = await import('./src/hooks/events/memory-observer/handler.js');
+        const intent = detectIntent(bodyForAgent);
+
+        // Only inject if meaningful
+        if (intent.confidence < 0.1 && !intent.referencesPast && !intent.isQuestion) {
+          return;
+        }
+
+        const memoryCtx = await buildMemoryContext(bodyForAgent);
+        if (memoryCtx.injectedCount > 0) {
+          ctx._observatoryContext = formatContextForAgent(intent, memoryCtx.ftsResults, memoryCtx.patterns);
+          ctx._observatoryIntent = intent;
+          console.log(`[Observatory:memory-observer] Injected ${memoryCtx.injectedCount} context entries for ${ctx.from || 'unknown'}`);
+        }
+      } catch (e) {
+        console.error('[Observatory:memory-observer] Error:', e);
+      }
+    }, { name: 'observatory:memory-observer' });
+
     // Error Classifier Hook
     api.registerHook('after_tool_call', async (event: unknown) => {
       if (!zcState) return;
@@ -1218,7 +1247,156 @@ export default definePluginEntry({
       else console.warn(logLine);
 
       errCtx._zcrystal_error_classification = classification;
-    });
+
+      // Observatory: Auto-capture tool failure as outcome
+      try {
+        const OBS_LOG = '/home/snow/.openclaw/workspace/.observatory/log.jsonl';
+        const fs = await import('node:fs');
+        const outcome = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          tool: toolName || 'unknown',
+          category: 'system',
+          outcome: 'failure',
+          duration: durationMs ?? 0,
+          timestamp: new Date().toISOString(),
+          tags: [classification.category, classification.severity],
+          pattern: `error:${classification.category}`,
+          error: (error ?? '').slice(0, 100),
+        };
+        fs.appendFileSync(OBS_LOG, JSON.stringify(outcome) + '\n');
+        console.log(`[Observatory:outcome-capture] Tool=${toolName} → failure (${classification.category})`);
+      } catch (e) {
+        console.warn('[Observatory:outcome-capture] Failed to log:', e);
+      }
+    }, { name: 'zcrystal:error-classifier' });
+
+    // Observatory: Universal Outcome Capture (success + failure + pattern update)
+    // Replaces the zcrystal:error-classifier — captures ALL tool calls, not just failures
+    api.registerHook('after_tool_call', async (event: unknown) => {
+      if (!zcState) return;
+      const errCtx = event as { toolName?: string; error?: string; durationMs?: number; [key: string]: unknown };
+      const { toolName, error, durationMs } = errCtx;
+
+      const OBS_LOG = '/home/snow/.openclaw/workspace/.observatory/log.jsonl';
+      const PATTERNS_DB = '/home/snow/.openclaw/workspace/.observatory/patterns.json';
+
+      let category = 'system';
+      let tags: string[] = [];
+      let pattern = 'success';
+      let errorMsg: string | undefined;
+      let outcomeType: 'success' | 'failure' = 'success';
+
+      if (error) {
+        // ─── Failure Path ───────────────────────────────────────────────
+        outcomeType = 'failure';
+        const classification = classifyError(error);
+        category = classification.category;
+        tags = [classification.category, classification.severity];
+        pattern = `error:${classification.category}`;
+        errorMsg = (error ?? '').slice(0, 100);
+        errCtx._zcrystal_error_classification = classification;
+      } else {
+        // ─── Success Path ───────────────────────────────────────────────
+        const tool = toolName || '';
+        if (tool.includes('decomp')) { category = 'decompose'; tags = ['decompose']; pattern = 'decompose'; }
+        else if (tool.includes('route')) { category = 'route'; tags = ['route']; pattern = 'route'; }
+        else if (tool.includes('observatory')) { category = 'observatory'; tags = ['observatory']; pattern = 'observatory'; }
+        else if (tool.includes('metric')) { category = 'metrics'; tags = ['metrics']; pattern = 'metrics'; }
+        else if (tool.includes('health')) { category = 'health'; tags = ['health']; pattern = 'health'; }
+        else { category = 'general'; tags = ['general']; pattern = 'success'; }
+      }
+
+      // Log to observatory
+      try {
+        const fs = await import('node:fs');
+        const outcome = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          tool: toolName || 'unknown',
+          category,
+          outcome: outcomeType,
+          duration: durationMs ?? 0,
+          timestamp: new Date().toISOString(),
+          tags,
+          pattern,
+          error: errorMsg,
+        };
+        fs.appendFileSync(OBS_LOG, JSON.stringify(outcome) + '\n');
+        console.log(`[Observatory:outcome] ${toolName} → ${outcomeType} (${category}, ${durationMs ?? 0}ms)`);
+
+        // Update patterns DB
+        let db: any = { version: 1, patterns: {} };
+        if (fs.existsSync(PATTERNS_DB)) {
+          try { db = JSON.parse(fs.readFileSync(PATTERNS_DB, 'utf-8')); } catch { /* ignore */ }
+        }
+        const key = pattern;
+        const existing = db.patterns[key];
+        const score = outcomeType === 'success' ? 1.0 : 0.0;
+        if (existing) {
+          const newTotal = existing.totalAttempts + 1;
+          const newSuccess = existing.successRate * existing.totalAttempts + (outcomeType === 'success' ? 1 : 0);
+          existing.successRate = newSuccess / newTotal;
+          existing.totalAttempts = newTotal;
+          existing.lastUpdated = new Date().toISOString();
+          existing.avgDuration = (existing.avgDuration * existing.totalAttempts + (durationMs ?? 0)) / (existing.totalAttempts + 1);
+        } else {
+          db.patterns[key] = {
+            pattern: key,
+            category,
+            strategy: outcomeType === 'success' ? 'default-success' : 'needs-review',
+            successRate: score,
+            totalAttempts: 1,
+            lastUpdated: new Date().toISOString(),
+            avgDuration: durationMs ?? 0,
+          };
+        }
+        fs.writeFileSync(PATTERNS_DB, JSON.stringify(db, null, 2));
+
+        // L5: Trigger evolution check + notification if significant
+        if (existing && existing.totalAttempts >= 3 && existing.successRate >= 0.85) {
+          // Pattern is proven — notify user
+          const { notifyUser } = await import('./src/services/l5-notification.js');
+          await notifyUser(
+            `📈 Pattern 確認：${key}`,
+            `${key} 在 ${existing.totalAttempts} 次執行後達到 ${(existing.successRate * 100).toFixed(0)}% 成功率。已列為首選策略。`,
+            'pattern_shift'
+          );
+        } else if (existing && existing.totalAttempts >= 5 && existing.successRate <= 0.3) {
+          const { notifyUser: notifyUser2 } = await import('./src/services/l5-notification.js');
+          await notifyUser2(
+            `⚠️ Pattern 需要修正：${key}`,
+            `${key} 成功率僅 ${(existing.successRate * 100).toFixed(0)}%（${existing.totalAttempts} 次執行）。建議檢視策略。`,
+            'correction'
+          );
+        }
+      } catch (e) {
+        console.warn('[Observatory:outcome] Failed:', e);
+      }
+    }, { name: 'observatory:outcome-capture' });
+
+    // L5: Periodic evolution check scheduler (every 30 tool calls)
+    const l5CounterPath = '/home/snow/.openclaw/workspace/.observatory/.l5_counter';
+    let l5CallCount = 0;
+    const runL5Check = async () => {
+      try {
+        const { runEvolutionCheck } = await import('./src/services/l5-notification.js');
+        const notifications = await runEvolutionCheck();
+        if (notifications.length > 0) {
+          const { formatNotificationSummary } = await import('./src/services/l5-notification.js');
+          const summary = formatNotificationSummary(notifications);
+          console.log(`[L5] Evolution check complete: ${notifications.length} notifications`);
+        }
+      } catch (e) {
+        console.warn('[L5:scheduler] Failed:', e);
+      }
+    };
+    // Counter-based check (every 30 tool executions)
+    const checkInterval = setInterval(async () => {
+      l5CallCount++;
+      if (l5CallCount >= 30) {
+        l5CallCount = 0;
+        await runL5Check();
+      }
+    }, 5000); // Poll every 5 seconds to check counter
 
     // Self-Doubt Recall - Part 1: llm_output captures uncertainty
     api.registerHook('llm_output', async (event: unknown) => {
